@@ -56,7 +56,7 @@ def show_career_test(filename):
     if not os.path.exists(filepath):
         return jsonify({'error': 'File not found'}), 404
 
-    with open(filepath, 'r') as f:
+    with open(filepath, 'r',encoding="utf-8") as f:
         data = json.load(f)
 
     return jsonify(data), 200
@@ -118,13 +118,13 @@ def create_article():
              [author_id, title, career_type, media_filenames_json, content])
     return jsonify({'message': 'Article created successfully'}), 201
 
-@app.route('/comments/<int:article_id>', methods=['GET'])
-def get_comments(article_id):
-    comments = query_db('SELECT comment_id, created_at,user_id, content, created_at FROM comments WHERE article_id = ?', [article_id])
-    if not comments:
-        return jsonify({'message': '此文章還沒有任何留言'}), 200
+# @app.route('/comments/<int:article_id>', methods=['GET'])
+# def get_comments(article_id):
+#     comments = query_db('SELECT comment_id, created_at,user_id, content, created_at FROM comments WHERE article_id = ?', [article_id])
+#     if not comments:
+#         return jsonify({'message': '此文章還沒有任何留言'}), 200
 
-    return jsonify([{'comment_id': comment[0], 'user_id': comment[1], 'content': comment[2], 'created_at': comment[3]} for comment in comments]), 200
+#     return jsonify([{'comment_id': comment[0], 'user_id': comment[1], 'content': comment[2], 'created_at': comment[3]} for comment in comments]), 200
 
 @app.route('/comments', methods=['POST'])
 def create_comment():
@@ -139,13 +139,13 @@ def create_comment():
     query_db('INSERT INTO comments (article_id, user_id, content) VALUES (?, ?, ?)', [article_id, user_id, content])
     return jsonify({'message': 'Comment added successfully'}), 201
 
-@app.route('/re_comments/<int:comment_id>', methods=['GET'])
-def get_re_comments(comment_id):
-    re_comments = query_db('SELECT re_comment_id, user_id, content, created_at FROM re_comments WHERE comment_id = ?', [comment_id])
-    if not re_comments:
-        return jsonify({'message': '此留言還沒有任何回覆'}), 200
+# @app.route('/re_comments/<int:comment_id>', methods=['GET'])
+# def get_re_comments(comment_id):
+#     re_comments = query_db('SELECT re_comment_id, user_id, content, created_at FROM re_comments WHERE comment_id = ?', [comment_id])
+#     if not re_comments:
+#         return jsonify({'message': '此留言還沒有任何回覆'}), 200
 
-    return jsonify([{'re_comment_id': re_comment[0], 'user_id': re_comment[1], 'content': re_comment[2], 'created_at': re_comment[3]} for re_comment in re_comments]), 200
+#     return jsonify([{'re_comment_id': re_comment[0], 'user_id': re_comment[1], 'content': re_comment[2], 'created_at': re_comment[3]} for re_comment in re_comments]), 200
 
 @app.route('/re_comments', methods=['POST'])
 def create_re_comment():
@@ -173,7 +173,7 @@ def search_articles():
         SELECT articles.article_id, articles.author_id, articles.title, articles.career_type, articles.media, articles.content, articles.created_at, users.username
         FROM articles
         JOIN users ON articles.author_id = users.user_id
-        WHERE 1=1
+        WHERE 1=1 AND  is_deliete=0
     '''
     args = []
 
@@ -208,7 +208,7 @@ def get_article_details(article_id):
         SELECT articles.article_id, articles.author_id, articles.title, articles.career_type, articles.media, articles.content, articles.created_at, users.username
         FROM articles
         JOIN users ON articles.author_id = users.user_id
-        WHERE articles.article_id = ?
+        WHERE articles.article_id = ? AND is_deleted = 0
     ''', [article_id], one=True)
 
     if not article:
@@ -223,18 +223,23 @@ def get_article_details(article_id):
     ''', [article_id])
 
     # 獲取回覆留言資訊
-    re_comments = []
-    for comment in comments:
+    def get_re_comments(comment_id):
         re_comment_list = query_db('''
             SELECT re_comments.re_comment_id, re_comments.user_id, re_comments.content, re_comments.created_at, users.username
             FROM re_comments
             JOIN users ON re_comments.user_id = users.user_id
             WHERE re_comments.comment_id = ?
-        ''', [comment[0]])
-        re_comments.append({
-            'comment_id': comment[0],
-            're_comments': [{'re_comment_id': re_comment[0], 'user_id': re_comment[1], 'content': re_comment[2], 'created_at': re_comment[3], 'username': re_comment[4]} for re_comment in re_comment_list]
-        })
+        ''', [comment_id])
+        re_comments = []
+        for re_comment in re_comment_list:
+            re_comments.append({
+                're_comment_id': re_comment[0],
+                'user_id': re_comment[1],
+                'content': re_comment[2],
+                'created_at': re_comment[3],
+                'username': re_comment[4],
+            })
+        return re_comments
 
     # 構建返回結果
     result = {
@@ -246,17 +251,24 @@ def get_article_details(article_id):
         'content': article[5],
         'created_at': article[6],
         'username': article[7],
-        'comments': [{'comment_id': comment[0], 'user_id': comment[1], 'content': comment[2], 'created_at': comment[3], 'username': comment[4]} for comment in comments],
-        're_comments': re_comments
+        'comments': [{
+            'comment_id': comment[0],
+            'user_id': comment[1],
+            'content': comment[2],
+            'created_at': comment[3],
+            'username': comment[4],
+            're_comments': get_re_comments(comment[0])  # 獲取回覆留言
+        } for comment in comments]
     }
 
     return jsonify(result), 200
+
 @app.route('/careers', methods=['GET'])
 def get_careers():
     careers = query_db('SELECT career_id, type, description FROM careers')
     return jsonify([{'career_id': career[0], 'type': career[1], 'description': career[2]} for career in careers]), 200
 
-@app.route('/careers/<int:career_id>', methods=['GET'])
+@app.route('/work/<int:career_id>', methods=['GET'])
 def get_career(career_id):
     career = query_db('SELECT career_id, type, description FROM careers WHERE career_id = ?', [career_id], one=True)
     if not career:
@@ -291,27 +303,37 @@ def get_user_articles(user_id):
 
     return jsonify([{'article_id': article[0], 'title': article[1], 'created_at': article[2]} for article in articles]), 200
 
-@app.route('/user_articles/detail/<int:article_id>', methods=['GET'])
-def get_article_detail(article_id):
-    article = query_db('SELECT title, career_type, media, content, created_at, is_deleted FROM articles WHERE article_id = ?', [article_id], one=True)  # 修改這一行
-    if not article or article[5] == 1:  # 修改這一行
-        return jsonify({'message': '該文章不存在或已被刪除'}), 404  # 修改這一行
+# @app.route('/user_articles/detail/<int:article_id>', methods=['GET'])
+# def get_article_detail(article_id):
+#     article = query_db('SELECT title, career_type, media, content, created_at, is_deleted FROM articles WHERE article_id = ?', [article_id], one=True)  # 修改這一行
+#     if not article or article[5] == 1:  # 修改這一行
+#         return jsonify({'message': '該文章不存在或已被刪除'}), 404  # 修改這一行
 
-    return jsonify({'title': article[0], 'career_type': article[1], 'media': article[2], 'content': article[3], 'created_at': article[4]}), 200
+#     return jsonify({'title': article[0], 'career_type': article[1], 'media': article[2], 'content': article[3], 'created_at': article[4]}), 200
 
 @app.route('/user_articles/edit/<int:article_id>', methods=['POST'])
 def edit_article(article_id):
-    data = request.get_json()
+    data = request.form
     title = data.get('title')
     career_type = data.get('career_type')
-    media = data.get('media')
     content = data.get('content')
 
     if not title or not career_type or not content:
         return jsonify({'error': 'Missing required fields'}), 400
 
+    media_files = request.files.getlist('media')
+    media_filenames = []
+
+    for media_file in media_files:
+        if media_file.filename == '':
+            continue
+        media_file.save(f'media/{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}_{media_file.filename}')
+        media_filenames.append(media_file.filename)
+
+    media_filenames_json = json.dumps(media_filenames)
+
     query_db('UPDATE articles SET title = ?, career_type = ?, media = ?, content = ? WHERE article_id = ?', 
-             [title, career_type, media, content, article_id])
+             [title, career_type,media_filenames_json, content, article_id])
     return jsonify({'message': '文章編輯成功'}), 200
 
 @app.route('/user_articles/delete/<int:article_id>', methods=['DELETE'])
@@ -327,13 +349,44 @@ def get_favorites(user_id):
 
     return jsonify([{'article_id': favorite[0], 'title': favorite[1], 'created_at': favorite[2]} for favorite in favorites]), 200
 
-@app.route('/favorites/detail/<int:article_id>', methods=['GET'])
-def get_favorite_detail(article_id):
-    article = query_db('SELECT title, career_type, media, content, created_at, is_deleted FROM articles WHERE article_id = ?', [article_id], one=True)  # 修改這一行
-    if not article or article[5] == 1:  # 修改這一行
-        return jsonify({'message': '該文章已被刪除'}), 404  # 修改這一行
+# @app.route('/favorites/detail/<int:article_id>', methods=['GET'])
+# def get_favorite_detail(article_id):
+#     article = query_db('SELECT title, career_type, media, content, created_at, is_deleted FROM articles WHERE article_id = ?', [article_id], one=True)  # 修改這一行
+#     if not article or article[5] == 1:  # 修改這一行
+#         return jsonify({'message': '該文章已被刪除'}), 404  # 修改這一行
 
-    return jsonify({'title': article[0], 'career_type': article[1], 'media': article[2], 'content': article[3], 'created_at': article[4]}), 200
+#     return jsonify({'title': article[0], 'career_type': article[1], 'media': article[2], 'content': article[3], 'created_at': article[4]}), 200
+
+@app.route('/careers/<type>', methods=['GET'])
+def get_career_type(type):
+    try:
+        with open(f'type/{type}.json', 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        return jsonify(data), 200
+    except FileNotFoundError:
+        return jsonify({'error': '類型不存在'}), 404
+
+@app.route('/careers/<type>/jobs', methods=['GET'])
+def get_career_type_jobs(type):
+    try:
+        with open(f'work/{type}.json', 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        job_titles = list(data.keys())
+        return jsonify(job_titles), 200
+    except FileNotFoundError:
+        return jsonify({'error': '類型不存在'}), 404
+
+@app.route('/careers/<type>/jobs/<job_title>', methods=['GET'])
+def get_career_type_job_detail(type, job_title):
+    try:
+        with open(f'work/{type}.json', 'r', encoding='utf-8') as file:
+            data = json.load(file)
+        job_detail = data.get(job_title)
+        if not job_detail:
+            return jsonify({'error': '職業不存在'}), 404
+        return jsonify(job_detail), 200
+    except FileNotFoundError:
+        return jsonify({'error': '類型不存在'}), 404
 
 if __name__ == '__main__':
     app.run(debug=True)

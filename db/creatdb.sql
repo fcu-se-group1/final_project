@@ -54,8 +54,3 @@ CREATE TABLE favorites (
     FOREIGN KEY (article_id) REFERENCES articles(article_id)
 );
 
-CREATE TABLE careers (
-    career_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    type TEXT UNIQUE NOT NULL,
-    description TEXT NOT NULL
-);
