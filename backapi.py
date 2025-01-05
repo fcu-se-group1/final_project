@@ -44,11 +44,22 @@ def login():
     if not username or not password:
         return jsonify({'error': 'Missing required fields'}), 400
 
-    user = query_db('SELECT user_id, password,role FROM users WHERE username = ?', [username], one=True)
+    user = query_db('SELECT user_id, password,role,username FROM users WHERE username = ?', [username], one=True)
     if user is None or not bcrypt.check_password_hash(user[1], password):
         return jsonify({'error': 'Invalid username or password'}), 400
 
-    return jsonify({'message': 'Login successful', 'user_id': user[0],"user_role":user[2]}), 200
+    return jsonify({'message': 'Login successful', 'user_id': user[0],"user_role":user[2],'user_name':user[3]}), 200
+
+@app.route('/show_career_test/<string:filename>', methods=['GET'])
+def show_career_test(filename):
+    filepath = os.path.join('career_quation', f'{filename}.json')
+    if not os.path.exists(filepath):
+        return jsonify({'error': 'File not found'}), 404
+
+    with open(filepath, 'r') as f:
+        data = json.load(f)
+
+    return jsonify(data), 200
 
 @app.route('/career_test', methods=['POST'])
 def create_career_test():
@@ -70,6 +81,7 @@ def create_career_test():
     result = query_db('SELECT test_id FROM career_tests WHERE user_id = ? and result = ?',[user_id,result_filename], one=True)
     return jsonify({'message': 'Career test created successfully','test_id':result[0]}), 201
 
+    
 # @app.route('/career_test/<int:user_id>', methods=['GET'])
 # def get_career_test(user_id):
 #     tests = query_db('SELECT test_id, result, created_at FROM career_tests WHERE user_id = ?', [user_id])
@@ -127,32 +139,118 @@ def create_comment():
     query_db('INSERT INTO comments (article_id, user_id, content) VALUES (?, ?, ?)', [article_id, user_id, content])
     return jsonify({'message': 'Comment added successfully'}), 201
 
+@app.route('/re_comments/<int:comment_id>', methods=['GET'])
+def get_re_comments(comment_id):
+    re_comments = query_db('SELECT re_comment_id, user_id, content, created_at FROM re_comments WHERE comment_id = ?', [comment_id])
+    if not re_comments:
+        return jsonify({'message': '此留言還沒有任何回覆'}), 200
+
+    return jsonify([{'re_comment_id': re_comment[0], 'user_id': re_comment[1], 'content': re_comment[2], 'created_at': re_comment[3]} for re_comment in re_comments]), 200
+
+@app.route('/re_comments', methods=['POST'])
+def create_re_comment():
+    data = request.get_json()
+    comment_id = data.get('comment_id')
+    user_id = data.get('user_id')
+    content = data.get('content')
+
+    if not comment_id or not user_id or not content:
+        return jsonify({'error': 'Missing required fields'}), 400
+
+    query_db('INSERT INTO re_comments (comment_id, user_id, content) VALUES (?, ?, ?)', [comment_id, user_id, content])
+    return jsonify({'message': '回覆留言已成功添加'}), 201
+
 @app.route('/search_articles', methods=['GET'])
 def search_articles():
     career_type = request.args.get('career_type')
     keyword = request.args.get('keyword')
+    username = request.args.get('username')  # 新增這一行
 
-    if not career_type and not keyword:
+    if not career_type and not keyword and not username:  # 修改這一行
         return jsonify({'error': '至少需要一個檢索條件'}), 400
 
-    query = 'SELECT article_id, author_id, title, career_type, media, content, created_at FROM articles WHERE 1=1'
+    query = '''
+        SELECT articles.article_id, articles.author_id, articles.title, articles.career_type, articles.media, articles.content, articles.created_at, users.username
+        FROM articles
+        JOIN users ON articles.author_id = users.user_id
+        WHERE 1=1
+    '''
     args = []
 
     if career_type:
-        query += ' AND career_type LIKE ?'
+        query += ' AND articles.career_type LIKE ?'
         args.append(f'%{career_type}%')
 
     if keyword:
-        query += ' AND (title LIKE ? OR content LIKE ?)'
+        query += ' AND (articles.title LIKE ? OR articles.content LIKE ?)'
         args.append(f'%{keyword}%')
         args.append(f'%{keyword}%')
+
+    if username:  # 新增這一段
+        query += ' AND users.username LIKE ?'
+        args.append(f'%{username}%')
 
     articles = query_db(query, args)
     if not articles:
         return jsonify({'message': '查無符合條件的文章'}), 200
 
-    return jsonify([{'article_id': article[0], 'author_id': article[1], 'title': article[2], 'career_type': article[3], 'media': article[4], 'content': article[5], 'created_at': article[6]} for article in articles]), 200
+    return jsonify([{
+        'article_id': article[0],
+        'title': article[2],
+        'career_type': article[3],
+        'username': article[7]  # 新增這一行
+    } for article in articles]), 200
 
+@app.route('/article_details/<int:article_id>', methods=['GET'])
+def get_article_details(article_id):
+    # 獲取文章資訊
+    article = query_db('''
+        SELECT articles.article_id, articles.author_id, articles.title, articles.career_type, articles.media, articles.content, articles.created_at, users.username
+        FROM articles
+        JOIN users ON articles.author_id = users.user_id
+        WHERE articles.article_id = ?
+    ''', [article_id], one=True)
+
+    if not article:
+        return jsonify({'error': '文章不存在'}), 404
+
+    # 獲取留言資訊
+    comments = query_db('''
+        SELECT comments.comment_id, comments.user_id, comments.content, comments.created_at, users.username
+        FROM comments
+        JOIN users ON comments.user_id = users.user_id
+        WHERE comments.article_id = ?
+    ''', [article_id])
+
+    # 獲取回覆留言資訊
+    re_comments = []
+    for comment in comments:
+        re_comment_list = query_db('''
+            SELECT re_comments.re_comment_id, re_comments.user_id, re_comments.content, re_comments.created_at, users.username
+            FROM re_comments
+            JOIN users ON re_comments.user_id = users.user_id
+            WHERE re_comments.comment_id = ?
+        ''', [comment[0]])
+        re_comments.append({
+            'comment_id': comment[0],
+            're_comments': [{'re_comment_id': re_comment[0], 'user_id': re_comment[1], 'content': re_comment[2], 'created_at': re_comment[3], 'username': re_comment[4]} for re_comment in re_comment_list]
+        })
+
+    # 構建返回結果
+    result = {
+        'article_id': article[0],
+        'author_id': article[1],
+        'title': article[2],
+        'career_type': article[3],
+        'media': article[4],
+        'content': article[5],
+        'created_at': article[6],
+        'username': article[7],
+        'comments': [{'comment_id': comment[0], 'user_id': comment[1], 'content': comment[2], 'created_at': comment[3], 'username': comment[4]} for comment in comments],
+        're_comments': re_comments
+    }
+
+    return jsonify(result), 200
 @app.route('/careers', methods=['GET'])
 def get_careers():
     careers = query_db('SELECT career_id, type, description FROM careers')
