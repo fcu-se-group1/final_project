@@ -297,7 +297,7 @@ def get_test_detail(test_id):
 
 @app.route('/user_articles/<int:user_id>', methods=['GET'])
 def get_user_articles(user_id):
-    articles = query_db('SELECT article_id, title, created_at FROM articles WHERE author_id = ?', [user_id])
+    articles = query_db('SELECT article_id, title, created_at FROM articles WHERE author_id = ? AND is_deleted = 0', [user_id])
     if not articles:
         return jsonify({'message': '您尚未發表任何文章'}), 200
 
