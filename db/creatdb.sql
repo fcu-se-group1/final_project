@@ -17,6 +17,9 @@ CREATE TABLE articles (
     article_id INTEGER PRIMARY KEY AUTOINCREMENT,
     author_id INTEGER NOT NULL,
     title TEXT NOT NULL,
+    career_type TEXT NOT NULL,
+    media TEXT NOT NULL,
+    is_deliete INTEGER DEFAULT 0,
     content TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (author_id) REFERENCES users(user_id)
