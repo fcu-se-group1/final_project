@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Search result{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
+    <div class="col-lg-4">
+        <div class="card border-purple rounded-4 h-100">
+            <div class="card-header p-3 px-4"><h3 class="fw-bold mb-0">搜尋結果</h3></div>
+            
+            <div class="card-body text-secondary d-flex justify-content-center align-items-center p-2">
+                <div class="d-flex flex-column justify-content-center align-items-start my-3" style="gap: 0.5rem;">
+                    <div class="col-12 d-flex justify-content-center align-items-center">
+                        <p id="table" class="fw-bold mb-0"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer px-4">
+                <div class="d-flex justify-content-center" style="gap: 2rem;">
+                    <a href="{{ url_for('chooseFunction') }}" id="checkButton" class="btn btn-indigo" onclick="clearSelectedFunction()">返回</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content1 %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchTestResults();
+    });
+
+    async function fetchTestResults() {
+        try {
+            const response = await fetch('/api/get_test_results'); // 假設這是你的 API 端點
+            const data = await response.json();
+            displayResults(data);
+        } catch (error) {
+            console.error('Error fetching test results:', error);
+        }
+    }
+
+    function displayResults(data) {
+        const tableElement = document.getElementById('table');
+        let tableContent = '<table class="table table-bordered"><thead><tr><th>類型</th><th>分數</th></tr></thead><tbody>';
+
+        data.results.forEach(result => {
+            tableContent += `<tr><td>${result.type}</td><td>${result.score}</td></tr>`;
+        });
+
+        tableContent += '</tbody></table>';
+        tableElement.innerHTML = tableContent;
+    }
+
+    function clearSelectedFunction() {
+        localStorage.removeItem('selectedFunction');
+    }
+</script>
+{% endblock %}

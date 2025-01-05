@@ -5,7 +5,7 @@ import json
 import os
 from flask_bcrypt import Bcrypt
 
-app = Flask(__name__, static_folder='.', template_folder='.')
+app = Flask(__name__, static_folder='static', template_folder='templates')
 bcrypt = Bcrypt(app)
 
 def query_db(query, args=(), one=False):
@@ -16,6 +16,94 @@ def query_db(query, args=(), one=False):
     conn.commit()
     conn.close()
     return (rv[0] if rv else None) if one else rv
+
+@app.route('/')
+def homepage():
+    return render_template('homepage.html')
+
+@app.route('/add_comment')
+def add_comment():
+    return render_template('add_comment.html')
+
+@app.route('/article_content')
+def article_content():
+    return render_template('article_content.html')
+
+@app.route('/article_record')
+def article_record():
+    return render_template('article_record.html')
+
+@app.route('/career_test_result')
+def career_test_result():
+    return render_template('career_test_result.html')
+
+@app.route('/career_test')
+def career_test():
+    return render_template('career_test.html')
+
+@app.route('/chooseFunction')
+def chooseFunction():
+    return render_template('chooseFunction.html')
+
+@app.route('/edit_article')
+def edit_article():
+    return render_template('edit_article.html')
+
+@app.route('/favorite_article')
+def favorite_article():
+    return render_template('favorite_article.html')
+
+@app.route('/history_test_record_check')
+def history_test_record_check():
+    return render_template('history_test_record_check.html')
+
+@app.route('/history_test_record')
+def history_test_record():
+    return render_template('history_test_record.html')
+
+@app.route('/job_intro')
+def job_intro():
+    return render_template('job_intro.html')
+
+@app.route('/log_in')
+def log_in():
+    return render_template('log_in.html')
+
+@app.route('/post_article')
+def post_article():
+    return render_template('post_article.html')
+
+@app.route('/reply_author')
+def reply_author():
+    return render_template('reply_author.html')
+
+@app.route('/search_article')
+def search_article():
+    return render_template('search_article.html')
+
+@app.route('/search_result')
+def search_result():
+    return render_template('search_result.html')
+
+@app.route('/seeker_personal_homepage')
+def seeker_personal_homepage():
+    return render_template('seeker_personal_homepage.html')
+
+@app.route('/sign_up')
+def sign_up():
+    return render_template('sign_up.html')
+
+@app.route('/social_personal_homepage')
+def social_personal_homepage():
+    return render_template('social_personal_homepage.html')
+
+@app.route('/type_intro_choose')
+def type_intro_choose():
+    return render_template('type_intro_choose.html')
+
+@app.route('/type_intro')
+def type_intro():
+    return render_template('type_intro.html')
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -311,30 +399,30 @@ def get_user_articles(user_id):
 
 #     return jsonify({'title': article[0], 'career_type': article[1], 'media': article[2], 'content': article[3], 'created_at': article[4]}), 200
 
-@app.route('/user_articles/edit/<int:article_id>', methods=['POST'])
-def edit_article(article_id):
-    data = request.form
-    title = data.get('title')
-    career_type = data.get('career_type')
-    content = data.get('content')
+# @app.route('/user_articles/edit/<int:article_id>', methods=['POST'])
+# def edit_article(article_id):
+#     data = request.form
+#     title = data.get('title')
+#     career_type = data.get('career_type')
+#     content = data.get('content')
 
-    if not title or not career_type or not content:
-        return jsonify({'error': 'Missing required fields'}), 400
+#     if not title or not career_type or not content:
+#         return jsonify({'error': 'Missing required fields'}), 400
 
-    media_files = request.files.getlist('media')
-    media_filenames = []
+#     media_files = request.files.getlist('media')
+#     media_filenames = []
 
-    for media_file in media_files:
-        if media_file.filename == '':
-            continue
-        media_file.save(f'media/{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}_{media_file.filename}')
-        media_filenames.append(media_file.filename)
+#     for media_file in media_files:
+#         if media_file.filename == '':
+#             continue
+#         media_file.save(f'media/{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}_{media_file.filename}')
+#         media_filenames.append(media_file.filename)
 
-    media_filenames_json = json.dumps(media_filenames)
+#     media_filenames_json = json.dumps(media_filenames)
 
-    query_db('UPDATE articles SET title = ?, career_type = ?, media = ?, content = ? WHERE article_id = ?', 
-             [title, career_type,media_filenames_json, content, article_id])
-    return jsonify({'message': '文章編輯成功'}), 200
+#     query_db('UPDATE articles SET title = ?, career_type = ?, media = ?, content = ? WHERE article_id = ?', 
+#              [title, career_type,media_filenames_json, content, article_id])
+#     return jsonify({'message': '文章編輯成功'}), 200
 
 @app.route('/user_articles/delete/<int:article_id>', methods=['DELETE'])
 def delete_article(article_id):

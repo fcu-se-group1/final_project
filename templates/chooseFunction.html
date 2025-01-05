@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% block title %}chooseFunction{% endblock %}
+
+{% block content %}
+    <div class="container d-flex flex-column justify-content-center align-items-center" style="height: 80%; gap: 1rem;">
+        <div class="d-flex flex-column justify-content-start align-items-center overflow-auto" style="height: 55vh;">
+            <div class="text-white" >
+                <h1 class=" fw-bold mb-0">請選擇您想要使用的功能</h1>
+            </div>
+    
+            <div class="col-12 d-flex flex-column justify-content-start align-items-center" >
+    
+                <div class="col-9 row row-cols-1 row-cols-md-3 d-flex justify-content-center mb-md-3">
+                    
+                    <div class="col-12">
+                        <a href="{{ url_for('career_test') }}" class="text-decoration-none" onclick="chooseFunction('function_careerTest')">
+                            <div class="card border-purple h-100">
+                                <div class="card-header"><h4 class="fw-bold mb-0">職涯測驗</h4></div>
+                                <div class="card-body text-purple">
+                                    <h5 class="card-title fw-bold">功能說明:</h5>
+                                    <p class="card-text mb-0">進行職涯測驗，幫助您了解適合的職業方向。</p> <!-- ai暫時生成 -->
+                                    <span class="stretched-link"></span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <div class="col-12 ">
+                        <a href="#" class="text-decoration-none" onclick="chooseFunction('function_postArticle')">
+                            <div class="card border-purple h-100">
+                                <div class="card-header"><h4 class="fw-bold mb-0">發表文章</h4></div>
+                                <div class="card-body text-purple">
+                                    <h5 class="card-title fw-bold">功能說明:</h5>
+                                    <p class="card-text mb-0">分享您的就業經驗，幫助其他人了解職場。</p> <!-- ai暫時生成 -->
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <div class="col-12">
+                        <a href="{{ url_for('search_article') }}" class="text-decoration-none" onclick="chooseFunction('function_searchArticle')">
+                            <div class="card border-purple h-100">
+                                <div class="card-header"><h4 class="fw-bold mb-0">搜尋文章</h4></div>
+                                <div class="card-body text-purple">
+                                    <h5 class="card-title fw-bold">功能說明:</h5>
+                                    <p class="card-text mb-0">搜尋相關文章，獲取更多資訊。</p> <!-- ai暫時生成 -->
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+    
+                </div>
+    
+                <div class="col-9 row row-cols-1 row-cols-md-3  d-flex justify-content-center">
+    
+                    <div class="col-12">
+                        <a href="{{ url_for('type_intro_choose') }}" class="text-decoration-none" onclick="chooseFunction('function_typeIntro')">
+                            <div class="card border-purple h-100">
+                                <div class="card-header"><h4 class="fw-bold mb-0">各類型適合之職業介紹</h4></div>
+                                <div class="card-body text-purple">
+                                    <h5 class="card-title fw-bold">功能說明:</h5>
+                                    <p class="card-text mb-0">介紹各類型適合的職業，幫助您選擇職業方向。</p> <!-- ai暫時生成 -->
+                                    <span class="stretched-link"></span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+    
+                    <div class="col-12">
+                        <a href="#" class="text-decoration-none" onclick="chooseFunction('function_personalHomepage')">
+                            <div class="card border-purple h-100">
+                                <div class="card-header"><h4 class="fw-bold mb-0">個人主頁</h4></div>
+                                <div class="card-body text-purple">
+                                    <h5 class="card-title fw-bold">功能說明:</h5>
+                                    <p class="card-text mb-0">查看和管理您的個人資料和設置。</p> <!-- ai暫時生成 -->
+                                    <span class="stretched-link"></span>                  
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+    
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content1 %}
+    <script>
+        function chooseFunction(functionName){
+            const SID = localStorage.getItem('SID');
+            const identity = localStorage.getItem('identity');
+            if ((functionName === 'function_postArticle' || functionName === 'function_personalHomepage') && !SID) {
+                Swal.fire({
+                    title: '無法使用此功能',
+                    text: '您尚未登入',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                });
+            } else {
+                localStorage.setItem('selectedFunction', functionName);
+                // 根據功能名稱導航到相應的頁面
+                if (functionName === 'function_postArticle') {
+                    window.location.href = "{{ url_for('post_article') }}";
+                } else if (functionName === 'function_personalHomepage' && identity === 'seeker') {
+                    window.location.href = "{{ url_for('seeker_personal_homepage') }}";
+                }else if (functionName === 'function_personalHomepage' && identity === 'social') {
+                    window.location.href = "{{ url_for('social_personal_homepage') }}";
+                }
+            }
+        }
+
+        function adjustHeading() {
+            const headers = document.querySelectorAll('.card-header');
+            const titles = document.querySelectorAll('.card-title');
+
+            headers.forEach(header => {
+                if (!header.dataset.originalContent) {
+                    header.dataset.originalContent = header.textContent;
+                }
+                if (window.innerWidth >= 1400) {
+                    header.innerHTML = `<h4 class="fw-bold mb-0">${header.dataset.originalContent}</h4>`;
+                } else if (window.innerWidth >= 1200) {
+                    header.innerHTML = `<h5 class="fw-bold mb-0">${header.dataset.originalContent}</h5>`;
+                } else {
+                    header.innerHTML = `<h6 class="fw-bold mb-0">${header.dataset.originalContent}</h6>`;
+                }
+            });
+
+            titles.forEach(title => {
+                if (!title.dataset.originalContent) {
+                    title.dataset.originalContent = title.textContent;
+                }
+                if (window.innerWidth >= 1400) {
+                    title.innerHTML = `<h5 class="card-title fw-bold">${title.dataset.originalContent}</h5>`;
+                    title.style.display = '';
+                } else if (window.innerWidth >= 1200) {
+                    title.innerHTML = `<h6 class="card-title fw-bold">${title.dataset.originalContent}</h6>`;
+                    title.style.display = '';
+                } else {
+                    title.style.display = `none`;
+                }
+            });
+        }
+
+        window.addEventListener('resize', adjustHeading);
+        window.addEventListener('load', adjustHeading);
+
+    </script>
+{% endblock %}

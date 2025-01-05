@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Search article{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
+
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card border-purple rounded-4 h-100">
+            <div class="card-header p-3 px-4"><h3 class="fw-bold mb-0">搜尋文章</h3></div>
+            
+            <div class="col-12 card-body text-purple d-flex justify-content-center align-items-start p-4 overflow-auto" style="height: 50vh;">
+                <div class="col-lg-8 d-flex flex-column justify-content-center align-items-center" style="gap: 1rem;">
+                    <div class="col-12 d-flex align-items-center">
+                        <input class="form-check-input me-2" type="checkbox" id="checkbox1">
+                        <h5 class="card-title fw-bold mb-0">職業類型:&nbsp;&nbsp;</h5>
+                        <div class="form-check col-3 mb-0">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="realistic">
+                            <label class="form-check-label" for="realistic">R實用型</label>
+                        </div>
+                        <div class="form-check col mb-0">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="investigative">
+                            <label class="form-check-label" for="investigative">I研究型</label>
+                        </div>
+                        <div class="form-check col mb-0">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="artistic">
+                            <label class="form-check-label" for="artistic">A藝術型</label>
+                        </div>
+                        <div class="form-check col mb-0">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="social">
+                            <label class="form-check-label" for="social">S社會型</label>
+                        </div>
+                        <div class="form-check col mb-0">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="enterprising">
+                            <label class="form-check-label" for="enterprising">E企業型</label>
+                        </div>
+                        <div class="form-check col mb-0">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="conventional">
+                            <label class="form-check-label" for="conventional">C事務型</label>
+                        </div>
+                    </div>
+                    <div class="col-12 d-flex align-items-center">
+                        <input class="form-check-input me-2" type="checkbox" id="checkbox2">
+                        <h5 class="card-title fw-bold mb-0">文章關鍵字:&nbsp;&nbsp;</h5>
+                        <input type="text" class="form-control col" placeholder="請輸入關鍵字..." id="PD">
+                    </div>
+                    <div class="col-12 d-flex align-items-center">
+                        <input class="form-check-input me-2" type="checkbox" id="checkbox3">
+                        <h5 class="card-title col-3 col-xl-2 fw-bold mb-0">作者:</h5>
+                        <input type="text" class="form-control col" placeholder="請輸入作者暱稱..." id="SID">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer px-5">
+                <div class="d-flex justify-content-between" style="gap: 2rem;">
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">重設</button>
+                    <div class="d-flex" style="gap: 2rem;">
+                        <a href="{{ url_for('chooseFunction') }}" class="btn btn-indigo">返回</a>
+                        <a href="#" id="confirmButton" class="btn btn-indigo" onclick="searchArticle()">查詢</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block content1 %}
+
+<script>
+    function resetForm() {
+        const inputs = document.querySelectorAll('.card-body input[type="text"]');
+        const checkboxes = document.querySelectorAll('.card-body input[type="checkbox"]');
+        const radios = document.querySelectorAll('.card-body input[type="radio"]');
+
+        inputs.forEach(input => input.value = '');
+        checkboxes.forEach(checkbox => checkbox.checked = false);
+        radios.forEach(radio => radio.checked = false);
+    }
+
+    async function searchArticle() {
+        const courseCodeCheckbox = document.getElementById('course_code_checkbox').checked;
+        const courseNameCheckbox = document.getElementById('course_name_checkbox').checked;
+        const courseTimeCheckbox = document.getElementById('course_time_checkbox').checked;
+        const instructorCheckbox = document.getElementById('instructor_checkbox').checked;
+        const classNameCheckbox = document.getElementById('class_name_checkbox').checked;
+        const locationCheckbox = document.getElementById('location_checkbox').checked;
+        const compulsoryCheckbox = document.getElementById('compulsory_checkbox').checked;
+
+        const courseCode = courseCodeCheckbox ? document.getElementById('course_code').value : '';
+        const courseName = courseNameCheckbox ? document.getElementById('course_name').value : '';
+        const weekday = courseTimeCheckbox ? document.getElementById('weekday').value : '';
+        const timeSlot = courseTimeCheckbox ? document.getElementById('time_slot').value : '';        
+        const instructor = instructorCheckbox ? document.getElementById('instructor').value : '';
+        const className = classNameCheckbox ? document.getElementById('class_name').value : '';
+        const location = locationCheckbox ? document.getElementById('location').value : '';
+        const compulsory = compulsoryCheckbox ? document.querySelector('input[name="compulsory"]:checked').value : '';
+
+        const response = await fetch('/course_query/check_course_query_input', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                course_code: courseCode,
+                course_name: courseName,
+                weekday: weekday,
+                time_slot: timeSlot,
+                instructor: instructor,
+                class_name: className,
+                location: location,
+                compulsory: compulsory,
+            })
+
+        });
+
+        const data = await response.json();
+        if (data.status === 'found') {
+            localStorage.setItem('searchArticleResult', JSON.stringify(data.courses));
+            window.location.href = "/search_result";
+        } else if (data.status === 'not_found') {
+            alert('查無符合條件的課程');
+        } else if (data.status === 'empty') {
+            alert('至少需要一個查詢條件');
+        }
+    }
+
+</script>
+{% endblock %}

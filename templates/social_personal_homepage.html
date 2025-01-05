@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+
+{% block title %}Social personal homepage{% endblock %}
+
+{% block content %}
+    <div class="container d-flex flex-column justify-content-center align-items-center" style="height: 80%; gap: 1rem;">
+        <div class="d-flex flex-column justify-content-start align-items-center overflow-auto" style="height: 55vh;">
+            <div class="text-white" >
+                <h1 class=" fw-bold mb-0">個人主頁</h1>
+            </div>
+    
+            <div class="col-12 d-flex flex-column justify-content-start align-items-center" >
+    
+                <div class="col-9 row row-cols-1 row-cols-md-3 d-flex justify-content-center mb-md-3">
+                    
+                    <div class="col-12">
+                        <a href="{{ url_for('article_record') }}" class="text-decoration-none" onclick="chooseFunction('function_articleRecord')">
+                            <div class="card border-purple h-100">
+                                <div class="card-header"><h4 class="fw-bold mb-0">發表過的文章</h4></div>
+                                <div class="card-body text-purple">
+                                    <p class="card-text mb-0">進行職涯測驗，幫助您了解適合的職業方向。</p> <!-- ai暫時生成 -->
+                                    <span class="stretched-link"></span>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <div class="col-12 ">
+                        <a href="{{ url_for('favorite_article') }}" class="text-decoration-none" onclick="chooseFunction('function_favorite')">
+                            <div class="card border-purple h-100">
+                                <div class="card-header"><h4 class="fw-bold mb-0">收藏的文章</h4></div>
+                                <div class="card-body text-purple">
+                                    <p class="card-text mb-0">分享您的就業經驗，幫助其他人了解職場。</p> <!-- ai暫時生成 -->
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+    
+                </div>
+
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content1 %}
+    <script>
+        function chooseFunction(functionName){
+            localStorage.setItem('selectedPersonalFunction', functionName);
+        }
+
+        function adjustHeading() {
+            const headers = document.querySelectorAll('.card-header');
+            const titles = document.querySelectorAll('.card-title');
+
+            headers.forEach(header => {
+                if (!header.dataset.originalContent) {
+                    header.dataset.originalContent = header.textContent;
+                }
+                if (window.innerWidth >= 1400) {
+                    header.innerHTML = `<h4 class="fw-bold mb-0">${header.dataset.originalContent}</h4>`;
+                } else if (window.innerWidth >= 1200) {
+                    header.innerHTML = `<h5 class="fw-bold mb-0">${header.dataset.originalContent}</h5>`;
+                } else {
+                    header.innerHTML = `<h6 class="fw-bold mb-0">${header.dataset.originalContent}</h6>`;
+                }
+            });
+
+            titles.forEach(title => {
+                if (!title.dataset.originalContent) {
+                    title.dataset.originalContent = title.textContent;
+                }
+                if (window.innerWidth >= 1400) {
+                    title.innerHTML = `<h5 class="card-title fw-bold">${title.dataset.originalContent}</h5>`;
+                    title.style.display = '';
+                } else if (window.innerWidth >= 1200) {
+                    title.innerHTML = `<h6 class="card-title fw-bold">${title.dataset.originalContent}</h6>`;
+                    title.style.display = '';
+                } else {
+                    title.style.display = `none`;
+                }
+            });
+        }
+
+        window.addEventListener('resize', adjustHeading);
+        window.addEventListener('load', adjustHeading);
+
+    </script>
+{% endblock %}

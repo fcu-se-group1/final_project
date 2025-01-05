@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Post article{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
+    <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+        <div class="card border-purple rounded-4 h-100">
+
+            <div class="card-header d-flex justify-content-between p-3 px-4">
+                <h3 class="fw-bold mb-0">發表文章</h3>
+                <p id="articleCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
+            </div>
+
+            <div class="col-12 card-body text-purple d-flex justify-content-center align-items-start p-4 overflow-auto" style="height: 50vh;">
+                <div class="col-lg-8 d-flex flex-column justify-content-center align-items-center" style="gap: 1rem;">
+                    <div class="col-12 d-flex align-items-center">
+                        <h5 class="card-title fw-bold mb-0">標題:&nbsp;&nbsp;</h5>
+                        <input type="text" class="form-control col" placeholder="請輸入標題..." id="articleTitle">
+                    </div>
+                    <div class="col-12 d-flex align-items-center">
+                        <h5 class="card-title fw-bold mb-0">職業類型:&nbsp;&nbsp;</h5>
+                        <div class="form-check col-3 mb-0">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="realistic">
+                            <label class="form-check-label" for="realistic">R實用型</label>
+                        </div>
+                        <div class="form-check col mb-0">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="investigative">
+                            <label class="form-check-label" for="investigative">I研究型</label>
+                        </div>
+                        <div class="form-check col mb-0">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="artistic">
+                            <label class="form-check-label" for="artistic">A藝術型</label>
+                        </div>
+                        <div class="form-check col mb-0">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="social">
+                            <label class="form-check-label" for="social">S社會型</label>
+                        </div>
+                        <div class="form-check col mb-0">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="enterprising">
+                            <label class="form-check-label" for="enterprising">E企業型</label>
+                        </div>
+                        <div class="form-check col mb-0">
+                            <input class="form-check-input" type="radio" name="flexRadioDefault" id="conventional">
+                            <label class="form-check-label" for="conventional">C事務型</label>
+                        </div>
+                    </div>
+                    <div class="col-12 d-flex align-items-center">
+                        <h5 class="card-title col-3 col-xl-2 fw-bold mb-0">內文:</h5>
+                        <input type="text" class="form-control col" placeholder="請輸入相關經驗..." id="articleContent">
+                    </div>
+                    <div class="col-12 d-flex align-items-center">
+                        <h5 class="card-title col-3 col-xl-2 fw-bold mb-0">上傳圖片/影片:</h5>
+                        <button type="button" class="btn btn-primary ms-2" onclick="uploadFile()">上傳</button>
+                    </div>
+                    <div class="col-12" id="fileList"></div>
+                </div>
+            </div>
+
+            <div class="card-footer px-4">
+                <div class="d-flex justify-content-end" style="gap: 2rem;">
+                    <a href="{{ url_for('chooseFunction') }}" class="btn btn-indigo">返回</a>
+                    <a href="#" id="confirmButton" class="btn btn-indigo" onclick="postArticle()">發表</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content1 %}
+<script>
+    function uploadFile() {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.style.display = 'none';
+        fileInput.onchange = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const fileList = document.getElementById('fileList');
+                const fileRow = document.createElement('div');
+                fileRow.className = 'd-flex align-items-center justify-content-between mt-2';
+                fileRow.innerHTML = `
+                    <span>${file.name}</span>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeFile(this)">刪除</button>
+                `;
+                fileList.appendChild(fileRow);
+            }
+        };
+        document.body.appendChild(fileInput);
+        fileInput.click();
+        document.body.removeChild(fileInput);
+    }
+
+    function removeFile(button) {
+        const fileRow = button.parentElement;
+        fileRow.remove();
+    }
+
+    function postArticle() {
+        // Your post article logic here
+    }
+</script>
+{% endblock %}
