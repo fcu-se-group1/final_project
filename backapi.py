@@ -11,7 +11,7 @@ app = Flask(__name__, static_folder='static', template_folder='templates')
 bcrypt = Bcrypt(app)
 
 def query_db(query, args=(), one=False):
-    conn = sqlite3.connect('db\\db.db')
+    conn = sqlite3.connect('db\\database.db')
     cur = conn.cursor()
     cur.execute(query, args)
     rv = cur.fetchall()
@@ -277,8 +277,8 @@ def search_articles():
     args = []
 
     if career_type:
-        query += ' AND articles.career_type LIKE ?'
-        args.append(f'%{career_type}%')
+        query += ' AND articles.career_type = ?'
+        args.append(career_type)
 
     if keyword:
         query += ' AND (articles.title LIKE ? OR articles.content LIKE ?)'
@@ -290,6 +290,8 @@ def search_articles():
         args.append(f'%{username}%')
 
     articles = query_db(query, args)
+    print(query ,args)
+    print(articles)
     if not articles:
         return jsonify({'message': '查無符合條件的文章'}), 200
 
