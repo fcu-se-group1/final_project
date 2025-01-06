@@ -18,15 +18,15 @@
                 <div class="col-12 d-flex justify-content-center align-items-center">
                     <h3 id="questionText" class="fw-bold mb-0">點擊按鈕即可進行測驗</h3>
                 </div>
-                <div class="col-6 d-none justify-content-center align-items-center" id="agreementRow">
+                <div class="col-6 d-flex justify-content-center align-items-center" id="agreementRow" hidden>
                     <h5 class="col-4 fw-bold mb-0 d-flex justify-content-center">同意</h5>
                     <span class="col-4 mx-3 d-flex justify-content-center">&lt;---&gt;</span>
                     <h5 class="col-4 fw-bold mb-0 d-flex justify-content-center">不同意</h5>
                 </div>
-                <div class="col-12 d-none justify-content-center align-items-center" id="rangeRow">
+                <div class="col-12 d-flex justify-content-center align-items-center" id="rangeRow" hidden>
                     <input type="range" class="form-range" id="answerRange" min="1" max="5" step="1">
                 </div>
-                <div class="col-12 d-none justify-content-center align-items-center" id="answerContainer">
+                <div class="col-12 d-flex justify-content-center align-items-center" id="answerContainer">
                 </div>
             </div>
 
@@ -55,7 +55,6 @@
         for (const type of types) {
             const response = await fetch(`/show_career_test/${type}`);
             const data = await response.json();
-            questions = questions.concat(data['是非題'].map(q => ({ type: '是非題', text: q })));
             questions = questions.concat(data['選擇題'].map(q => ({ type: '選擇題', text: q })));
         }
     }
@@ -90,32 +89,16 @@
         const answerContainer = document.getElementById('answerContainer');
         answerContainer.innerHTML = '';
 
-        if (question.type === '是非題') {
-            const yesButton = document.createElement('button');
-            yesButton.textContent = '是';
-            yesButton.onclick = () => saveAnswer('是');
-            answerContainer.appendChild(yesButton);
+        document.getElementById('agreementRow').hidden = false;
+        document.getElementById('rangeRow').hidden = false;
 
-            const noButton = document.createElement('button');
-            noButton.textContent = '否';
-            noButton.onclick = () => saveAnswer('否');
-            answerContainer.appendChild(noButton);
-        } else if (question.type === '選擇題') {
-            const select = document.createElement('select');
-            const options = ['非常不同意', '不同意', '中立', '同意', '非常同意'];
-            options.forEach(option => {
-                const opt = document.createElement('option');
-                opt.value = option;
-                opt.textContent = option;
-                select.appendChild(opt);
-            });
-            answerContainer.appendChild(select);
+        const rangeInput = document.getElementById('answerRange');
+        rangeInput.value = 3; // 默認值為中立
 
-            const submitButton = document.createElement('button');
-            submitButton.textContent = '提交';
-            submitButton.onclick = () => saveAnswer(select.value);
-            answerContainer.appendChild(submitButton);
-        }
+        const submitButton = document.createElement('button');
+        submitButton.textContent = '提交';
+        submitButton.onclick = () => saveAnswer(rangeInput.value);
+        answerContainer.appendChild(submitButton);
     }
 
     function saveAnswer(answer) {
