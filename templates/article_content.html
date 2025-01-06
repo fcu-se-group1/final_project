@@ -31,7 +31,7 @@
 {% block content1 %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const articleId = 5;
+        const articleId = localStorage.getItem('article_id');
         if (articleId) {
             fetchArticleDetails(articleId);
         } else {

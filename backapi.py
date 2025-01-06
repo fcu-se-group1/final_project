@@ -422,7 +422,7 @@ def get_test_detail(test_id):
 
 @app.route('/user_articles/<int:user_id>', methods=['GET'])
 def get_user_articles(user_id):
-    articles = query_db('SELECT article_id, title, created_at FROM articles WHERE author_id = ? AND is_deleted = 0', [user_id])
+    articles = query_db('SELECT article_id, title, created_at FROM articles WHERE author_id = ? AND is_deliete = 0', [user_id])
     if not articles:
         return jsonify({'message': '您尚未發表任何文章'}), 200
 
@@ -463,7 +463,7 @@ def get_user_articles(user_id):
 
 @app.route('/user_articles/delete/<int:article_id>', methods=['DELETE'])
 def delete_article(article_id):
-    query_db('UPDATE articles SET is_deleted = 1 WHERE article_id = ?', [article_id])  # 修改這一行
+    query_db('UPDATE articles SET is_deliete = 1 WHERE article_id = ?', [article_id])  # 修改這一行
     return jsonify({'message': '該文章已被刪除'}), 200
 
 @app.route('/favorites/<int:user_id>', methods=['GET'])
