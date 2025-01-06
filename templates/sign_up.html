@@ -7,32 +7,33 @@
 
     <div class="col-12 col-md-10 col-lg-8 col-xl-6 card border-purple rounded-4 h-auto">
         <div class="card-header d-flex justify-content-between p-3 px-4">
-            <h3 class="fw-bold mb-0">註冊</h3>
+            <h2 class="fw-bold mb-0">註冊</h2>
             <p id="credits" class="col fw-bold mb-0 d-none d-sm-flex justify-content-end align-items-center text-secondary fs-7"></p>
         </div>
         
         <div class="card-body d-flex justify-content-center align-items-center text-purple p-4">
             <div class="col-10 col-lg-8 h-100 d-flex flex-column justify-content-between align-items-start" style="gap: 1rem;">
                 <div class="col-12 d-flex align-items-center">
-                    <h5 class="card-title fw-bold mb-0 ">帳號:&nbsp;&nbsp;</h5>
+                    <h4 class="card-title fw-bold mb-0 ">帳號:&nbsp;&nbsp;</h4>
                     <input type="text" class="form-control col" placeholder="請輸入帳號名稱..."  id="SID" >
                 </div>
                 <div class="col-12 d-flex align-items-center">
-                    <h5 class="card-title fw-bold mb-0">密碼:&nbsp;&nbsp;</h5>
+                    <h4 class="card-title fw-bold mb-0">密碼:&nbsp;&nbsp;</h4>
                     <input type="text" class="form-control col" placeholder="請輸入密碼..."  id="PD" >
                 </div>
                 <div class="col-12 d-flex align-items-center">
-                    <h5 class="card-title col-3 col-xl-2 fw-bold mb-0">身分:</h5>
-                    <div class="form-check col-3 mb-0">
-                        <input class="form-check-input" type="radio" name="identity" id="seeker" value="job_seeker" checked>
-                        <label class="form-check-label" for="seeker">求職者</label>
+                    <h4 class="card-title fw-bold mb-0">身分:&nbsp;&nbsp;</h4>
+                    <div class="col d-flex justify-content-start">
+                        <div class="form-check mb-0 d-flex justigy-content-center align-items-center">
+                            <input class="form-check-input me-2" type="radio" name="identity" id="seeker" value="job_seeker" checked>
+                            <label class="form-check-label fs-4 text-black me-2" for="seeker">求職者</label>
+                        </div>
+    
+                        <div class="form-check mb-0 d-flex justigy-content-center align-items-center">
+                            <input class="form-check-input me-2" type="radio" name="identity" id="social" value="professional">
+                            <label class="form-check-label fs-4 text-black" for="social">社會人士</label>
+                        </div>
                     </div>
-
-                    <div class="form-check col mb-0">
-                        <input class="form-check-input" type="radio" name="identity" id="social" value="professional">
-                        <label class="form-check-label" for="social">社會人士</label>
-                    </div>
-
                 </div>
             </div>
         </div>
@@ -75,7 +76,8 @@
                 title: '註冊成功',
                 text: `${SID}您好，歡迎使用本系統，請重新登入`,
                 icon: 'success',
-                confirmButtonText: '確定'
+                confirmButtonText: '確定',
+                scrollbarPadding: false
             }).then(() => {
                 window.location.href = '/log_in';
             });
@@ -85,7 +87,8 @@
                 title: '註冊失敗',
                 text: data.error,
                 icon: 'error',
-                confirmButtonText: '確定'
+                confirmButtonText: '確定',
+                scrollbarPadding: false
             });
         }
     }

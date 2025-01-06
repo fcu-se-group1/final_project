@@ -29,20 +29,29 @@
 {% block content1 %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        fetchArticleRecords();
+        const userId = localStorage.getItem('user_id');
+        if (userId) {
+            fetchArticleRecords(userId);
+        } else {
+            alert('無法獲取用戶ID');
+        }
     });
 
-    async function fetchArticleRecords() {
+    async function fetchArticleRecords(userId) {
         try {
-            // 假資料
-            const data = [
-                { title: '文章標題1', viewLink: '/view_article/1', editLink: '/edit_article/1', deleteLink: '/delete_article/1' },
-                { title: '文章標題2', viewLink: '/view_article/2', editLink: '/edit_article/2', deleteLink: '/delete_article/2' },
-                { title: '文章標題3', viewLink: '/view_article/3', editLink: '/edit_article/3', deleteLink: '/delete_article/3' },
-                { title: '文章標題4', viewLink: '/view_article/4', editLink: '/edit_article/4', deleteLink: '/delete_article/4' },
-                { title: '文章標題5', viewLink: '/view_article/5', editLink: '/edit_article/5', deleteLink: '/delete_article/5' }
-            ];
-            displayArticleRecords(data);
+            const response = await fetch(`/user_articles/${userId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                displayArticleRecords(data);
+            } else {
+                alert(data.error || '無法獲取文章記錄');
+            }
         } catch (error) {
             console.error('Error fetching article records:', error);
         }
@@ -50,27 +59,66 @@
 
     function displayArticleRecords(data) {
         const articleRecordContainer = document.getElementById('article_record');
-        const overflowContainer = document.getElementById('overflowContainer');
         const noRecordsMessage = document.getElementById('noRecordsMessage');
 
-        if (data.length > 0) {
-            let recordsContent = '';
-            data.forEach(record => {
-                recordsContent += `
-                    <div class="col record-item d-flex justify-content-center align-items-center w-100 mb-2">
-                        <span class="me-2">${record.title}</span>
-                        <div>
-                            <a href="${record.viewLink}" class="btn btn-blue btn-sm mx-2">查看</a>
-                            <a href="${record.editLink}" class="btn btn-purple btn-sm me-2">編輯</a>
-                            <a href="${record.deleteLink}" class="btn btn-peach btn-sm">刪除</a>
-                        </div>
-                    </div>
-                `;
-            });
-            articleRecordContainer.innerHTML = recordsContent;
-        } else {
+        if (data.message) {
             noRecordsMessage.classList.remove('d-none');
-            overflowContainer.classList.add('d-none');
+            return;
+        }
+
+        data.forEach(article => {
+            const articleDiv = document.createElement('div');
+            articleDiv.className = 'article-record mb-3';
+
+            const titleLink = document.createElement('a');
+            titleLink.href = '#';
+            titleLink.textContent = article.title;
+            titleLink.className = 'd-block mb-1';
+            titleLink.addEventListener('click', function() {
+                localStorage.setItem('article_id', article.article_id);
+                window.location.href = '/article_content';
+            });
+
+            const editLink = document.createElement('a');
+            editLink.href = `/edit_article?article_id=${article.article_id}`;
+            editLink.textContent = '編輯';
+            editLink.className = 'btn btn-sm btn-primary me-2';
+
+            const deleteLink = document.createElement('a');
+            deleteLink.href = '#';
+            deleteLink.textContent = '刪除';
+            deleteLink.className = 'btn btn-sm btn-danger';
+            deleteLink.addEventListener('click', function() {
+                deleteArticle(article.article_id);
+            });
+
+            articleDiv.appendChild(titleLink);
+            articleDiv.appendChild(editLink);
+            articleDiv.appendChild(deleteLink);
+            articleRecordContainer.appendChild(articleDiv);
+        });
+    }
+
+    async function deleteArticle(articleId) {
+        if (confirm('確定要刪除這篇文章嗎？')) {
+            try {
+                const response = await fetch(`/user_articles/delete/${articleId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    alert(data.message);
+                    location.reload();
+                } else {
+                    alert(data.error || '無法刪除文章');
+                }
+            } catch (error) {
+                console.error('Error deleting article:', error);
+            }
         }
     }
 </script>

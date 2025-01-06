@@ -1,24 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}Favorite article{% endblock %}
+{% block title %}Favorite Articles{% endblock %}
 
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
     <div class="col-12 col-md-10 col-lg-8 col-xl-6">
         <div class="card border-dark rounded-4 h-100">
             <div class="card-header d-flex justify-content-between p-3 px-4">
-                <h1 class="fw-bold mb-0">收藏文章</h1>
+                <h3 class="fw-bold mb-0">收藏的文章</h3>
                 <p id="courseCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
             </div>
             <div class="card-body col-12 text-dark p-4 d-flex justify-content-center align-items-center" id="cardBody">
-                <div class="col vh-40 p-0 d-flex flex-column justify-content-start align-items-center overflow-auto" id="overflowContainer">
-                    <div id="favorite_article_record"></div>
+                <div class="col-12 vh-50 p-0 d-flex flex-column justify-content-start align-items-center overflow-auto" id="overflowContainer">
+                    <div class="col-12" id="favorite_articles"></div>
                 </div>
-                <h4 id="noRecordsMessage" class="text-secondary my-3 d-none">您尚未收藏過文章</h4>
+                <p id="noFavoritesMessage" class="text-secondary my-3 d-none">您尚未收藏任何文章</p>
             </div>
             <div class="card-footer px-4">
                 <div class="d-flex justify-content-end" style="gap: 2rem;">
-                    <a href="#" class="btn btn-indigo" onclick="returnToHomepage()">返回</a>
+                    <a href="{{ url_for('social_personal_homepage') }}" class="btn btn-indigo">返回</a>
                 </div>
             </div>
         </div>
@@ -27,74 +27,80 @@
 {% endblock %}
 
 {% block content1 %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        fetchFavoriteArticles();
+        const userId = localStorage.getItem('user_id');
+        if (userId) {
+            fetchFavoriteArticles(userId);
+        } else {
+            alert('無法獲取用戶ID');
+        }
     });
 
-    async function fetchFavoriteArticles() {
+    async function fetchFavoriteArticles(userId) {
         try {
-            // 假資料
-            const data = [
-                { title: '文章標題1', link: '/view_article/1' },
-                { title: '文章標題2', link: '/view_article/2' },
-                { title: '文章標題3', link: '/view_article/3' },
-                { title: '文章標題4', link: '/view_article/4' },
-                { title: '文章標題5', link: '/view_article/5' }
-            ];
-            displayFavoriteArticles(data);
+            const response = await fetch(`/favorites/${userId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                displayFavoriteArticles(data);
+            } else {
+                alert(data.error || '無法獲取收藏的文章');
+            }
         } catch (error) {
             console.error('Error fetching favorite articles:', error);
         }
     }
 
     function displayFavoriteArticles(data) {
-        const favoriteArticleRecordContainer = document.getElementById('favorite_article_record');
-        const overflowContainer = document.getElementById('overflowContainer');
-        const noRecordsMessage = document.getElementById('noRecordsMessage');
+        const favoriteArticlesContainer = document.getElementById('favorite_articles');
+        const noFavoritesMessage = document.getElementById('noFavoritesMessage');
 
-        if (data.length > 0) {
-            let recordsContent = '';
-            data.forEach(record => {
-                recordsContent += `
-                    <div class="record-item">
-                        <h4><a href="${record.link}" class="text-decoration-none" onclick="checkArticle(event, '${record.link}')">${record.title}</a></h4>
-                    </div>
-                `;
-            });
-            favoriteArticleRecordContainer.innerHTML = recordsContent;
-        } else {
-            noRecordsMessage.classList.remove('d-none');
-            overflowContainer.classList.add('d-none');
+        if (data.message) {
+            noFavoritesMessage.classList.remove('d-none');
+            return;
         }
+
+        data.forEach(article => {
+            const articleDiv = document.createElement('div');
+            articleDiv.className = 'favorite-article mb-3';
+
+            const titleLink = document.createElement('a');
+            titleLink.href = '#';
+            titleLink.textContent = article.title;
+            titleLink.className = 'd-block mb-1';
+            titleLink.addEventListener('click', function() {
+                checkArticleExists(article.article_id);
+            });
+
+            articleDiv.appendChild(titleLink);
+            favoriteArticlesContainer.appendChild(articleDiv);
+        });
     }
 
-    async function checkArticle(event, link) {
-        event.preventDefault();
+    async function checkArticleExists(articleId) {
         try {
-            const response = await fetch(link);
-            if (response.status === 404) {
-                Swal.fire({
-                    title: '該文章已被刪除',
-                    text: '作者已刪除此文章',
-                    icon: 'error',
-                    confirmButtonText: '確定'
-                });
+            const response = await fetch(`/favorites/detail/${articleId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            if (response.ok && data.message === '存在') {
+                localStorage.setItem('article_id', articleId);
+                window.location.href = '/article_content';
             } else {
-                window.location.href = link;
+                alert(data.error || '該文章已被刪除');
             }
         } catch (error) {
-            console.error('Error checking article:', error);
-        }
-    }
-
-    function returnToHomepage() {
-        const identity = localStorage.getItem('user_role');
-        if (identity === 'job_seeker') {
-            window.location.href = "{{ url_for('seeker_personal_homepage') }}";
-        } else if (identity === 'professional') {
-            window.location.href = "{{ url_for('social_personal_homepage') }}";
+            console.error('Error checking article existence:', error);
         }
     }
 </script>

@@ -309,7 +309,7 @@ def get_article_details(article_id):
         SELECT articles.article_id, articles.author_id, articles.title, articles.career_type, articles.media, articles.content, articles.created_at, users.username
         FROM articles
         JOIN users ON articles.author_id = users.user_id
-        WHERE articles.article_id = ? AND is_deleted = 0
+        WHERE articles.article_id = ? AND is_deliete = 0
     ''', [article_id], one=True)
 
     if not article:
@@ -342,13 +342,24 @@ def get_article_details(article_id):
             })
         return re_comments
 
+    # 打開媒體檔案
+    media_contents = []
+    if(article[4] != None):
+        media_files = json.loads(article[4])
+        for media_file in media_files:
+            with open(media_file, 'rb') as f:
+                media_contents.append({
+                    'filename': os.path.basename(media_file),
+                    'content': f.read().decode('latin1')  # 使用latin1編碼以避免二進制數據損壞
+                })
+
     # 構建返回結果
     result = {
         'article_id': article[0],
         'author_id': article[1],
         'title': article[2],
         'career_type': article[3],
-        'media': article[4],
+        'media': media_contents,
         'content': article[5],
         'created_at': article[6],
         'username': article[7],
@@ -411,7 +422,7 @@ def history_test_detail():
 
 @app.route('/user_articles/<int:user_id>', methods=['GET'])
 def get_user_articles(user_id):
-    articles = query_db('SELECT article_id, title, created_at FROM articles WHERE author_id = ? AND is_deleted = 0', [user_id])
+    articles = query_db('SELECT article_id, title, created_at FROM articles WHERE author_id = ? AND is_deliete = 0', [user_id])
     if not articles:
         return jsonify({'message': '您尚未發表任何文章'}), 200
 
@@ -452,7 +463,7 @@ def get_user_articles(user_id):
 
 @app.route('/user_articles/delete/<int:article_id>', methods=['DELETE'])
 def delete_article(article_id):
-    query_db('UPDATE articles SET is_deleted = 1 WHERE article_id = ?', [article_id])  # 修改這一行
+    query_db('UPDATE articles SET is_deliete = 1 WHERE article_id = ?', [article_id])  # 修改這一行
     return jsonify({'message': '該文章已被刪除'}), 200
 
 @app.route('/favorites/<int:user_id>', methods=['GET'])
@@ -461,15 +472,15 @@ def get_favorites(user_id):
     if not favorites:
         return jsonify({'message': '您尚未收藏任何文章'}), 200
 
-    return jsonify([{'article_id': favorite[0], 'title': favorite[1], 'created_at': favorite[2]} for favorite in favorites]), 200
+    return jsonify([{'article_id': favorite[0], 'title': favorite[1], } for favorite in favorites]), 200
 
-# @app.route('/favorites/detail/<int:article_id>', methods=['GET'])
-# def get_favorite_detail(article_id):
-#     article = query_db('SELECT title, career_type, media, content, created_at, is_deleted FROM articles WHERE article_id = ?', [article_id], one=True)  # 修改這一行
-#     if not article or article[5] == 1:  # 修改這一行
-#         return jsonify({'message': '該文章已被刪除'}), 404  # 修改這一行
+@app.route('/favorites/detail/<int:article_id>', methods=['GET'])
+def get_favorite_detail(article_id):
+    article = query_db('SELECT title, career_type, media, content, created_at, is_deliete FROM articles WHERE article_id = ?', [article_id], one=True)  # 修改這一行
+    if not article or article[5] == 1:  # 修改這一行
+        return jsonify({'message': '該文章已被刪除'}), 404  # 修改這一行
 
-#     return jsonify({'title': article[0], 'career_type': article[1], 'media': article[2], 'content': article[3], 'created_at': article[4]}), 200
+    return jsonify({'message': '存在'}), 200
 
 @app.route('/careers/<type>', methods=['GET'])
 def get_career_type(type):

@@ -4,15 +4,18 @@
 
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
-    <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+    <div class="col-12 col-xl-10">
         <div class="card border-dark rounded-4 h-100">
             <div class="card-header d-flex justify-content-between p-3 px-4">
-                <h3 class="fw-bold mb-0">文章標題</h3>
-                <p id="courseCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
+                <h3 id="articleTitle" class="fw-bold mb-0">文章標題</h3>
+                <p id="articleAuthor" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
             </div>
             <div class="card-body col-12 text-dark p-4 d-flex justify-content-center align-items-center" id="cardBody">
                 <div class="col-12 p-0 d-flex flex-column justify-content-start align-items-start overflow-auto" style="height: 41vh; gap: 0.5rem;">
-                    
+                    <div id="mediaContent" class="mb-4"></div>
+                    <div id="articleContent" class="mb-4"></div>
+                    <h3>留言</h3>
+                    <div id="commentsSection"></div>
                 </div>
             </div>
             <div class="card-footer px-4">
@@ -26,7 +29,99 @@
 {% endblock %}
 
 {% block content1 %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const articleId = localStorage.getItem('article_id');
+        if (articleId) {
+            fetchArticleDetails(articleId);
+        } else {
+            Swal.fire({
+                title: '錯誤',
+                text: '無法獲取文章ID',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+        }
+    });
 
+    async function fetchArticleDetails(articleId) {
+        try {
+            const response = await fetch(`/article_details/${articleId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                displayArticleDetails(data);
+            } else {
+                Swal.fire({
+                    title: '錯誤',
+                    text: data.error || '無法獲取文章詳情',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                title: '錯誤',
+                text: '無法獲取文章詳情',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+        }
+    }
+
+    function displayArticleDetails(data) {
+        document.getElementById('articleTitle').textContent = data.title;
+        document.getElementById('articleAuthor').textContent = `作者: ${data.username}`;
+        document.getElementById('articleContent').textContent = data.content;
+
+        const mediaContent = document.getElementById('mediaContent');
+        data.media.forEach(media => {
+            if (media.filename.endsWith('.mp4')) {
+                const video = document.createElement('video');
+                video.src = `data:video/mp4;base64,${btoa(media.content)}`;
+                video.controls = true;
+                video.className = 'w-100 mb-2'; // 縮小顯示
+                mediaContent.appendChild(video);
+            } else {
+                const img = document.createElement('img');
+                img.src = `data:image/jpeg;base64,${btoa(media.content)}`;
+                img.className = 'w-100 mb-2'; // 縮小顯示
+                mediaContent.appendChild(img);
+            }
+        });
+
+        const commentsSection = document.getElementById('commentsSection');
+        data.comments.forEach(comment => {
+            const commentDiv = document.createElement('div');
+            commentDiv.className = 'mb-3';
+            commentDiv.innerHTML = `
+                <div class="fw-bold">${comment.username}:</div>
+                <div>${comment.content}</div>
+                <div class="text-muted">${comment.created_at}</div>
+            `;
+            commentsSection.appendChild(commentDiv);
+
+            comment.re_comments.forEach(reComment => {
+                const reCommentDiv = document.createElement('div');
+                reCommentDiv.className = 'ms-4 mb-2';
+                reCommentDiv.innerHTML = `
+                    <div class="fw-bold">${reComment.username}:</div>
+                    <div>${reComment.content}</div>
+                    <div class="text-muted">${reComment.created_at}</div>
+                `;
+                commentsSection.appendChild(reCommentDiv);
+            });
+        });
+    }
 </script>
 {% endblock %}
