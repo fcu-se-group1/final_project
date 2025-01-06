@@ -7810,6 +7810,18 @@ textarea.form-control-lg {
   height: 30vh !important;
 }
 
+.vh-35 {
+  height: 35vh !important;
+}
+
+.vh-40 {
+  height: 40vh !important;
+}
+
+.vh-45 {
+  height: 45vh !important;
+}
+
 .vh-50 {
   height: 50vh !important;
 }
