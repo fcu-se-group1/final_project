@@ -10,6 +10,7 @@
         <div class="card border-purple rounded-4 h-100">
             <div class="card-header p-3 px-4 d-flex justify-content-between align-items-center">
                 <h2 class="fw-bold mb-0" id="questionTitle">第 1 題</h2>
+                <button class="btn btn-indigo" id="saveButon" onclick="finishTest()">完成</button>
                 <div class="progress" style="width: 50%;" id="progressContainer">
                     <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" role="progressbar" style="width: 0%;"></div>
                 </div>
@@ -26,9 +27,6 @@
                 </div>
                 <div class="col-12 d-flex justify-content-center align-items-center" id="rangeRow">
                     <input type="range" class="form-range" id="answerRange" min="1" max="5" step="1">
-                </div>
-                <div class="col-12 d-flex justify-content-center align-items-center" id="rangeRow">
-                    <button class="btn btn-indigo" id="saveButon" onclick="saveAnswer()">儲存答案</button>
                 </div>
                 <div class="col-12 d-flex justify-content-center align-items-center" id="answerContainer">
                 </div>
@@ -88,42 +86,23 @@
     }
 
     function nextQuestion() {
+        saveAnswer();
         if (currentQuestionIndex < questions.length - 2) {
             currentQuestionIndex++;
             updateQuestion();
             document.getElementById('prevButton').hidden = false;
-            document.getElementById('nextButton').textContent = '下一題';
+            document.getElementById('nextButton').hidden = false;
         }
         else if (currentQuestionIndex < questions.length - 1) {
             currentQuestionIndex++;
             updateQuestion();
             document.getElementById('prevButton').hidden = false;
-            document.getElementById('nextButton').textContent = '完成';
-        }
-        else {
-            if (document.getElementById('progressBar').style.width === '100%') {
-                Swal.fire({
-                    title: '測驗完成',
-                    text: '您已完成所有題目',
-                    icon: 'success',
-                    confirmButtonText: '確定'
-                }).then(() => {
-                    // 提交測驗結果的邏輯
-                    console.log('測驗完成');
-                });
-            }
-            else {
-                Swal.fire({
-                    title: '測驗未完成',
-                    text: '請完整填寫問卷',
-                    icon: 'error',
-                    confirmButtonText: '確定'
-                });
-            }
+            document.getElementById('nextButton').hidden = true;
         }
     }
 
     function prevQuestion() {
+        saveAnswer();
         if (currentQuestionIndex > 0) {
             currentQuestionIndex--;
             updateQuestion();
@@ -134,6 +113,27 @@
         }
     }
 
+    function finishTest() {
+        if (document.getElementById('progressBar').style.width === '100%') {
+            Swal.fire({
+                title: '測驗完成',
+                text: '您已完成所有題目',
+                icon: 'success',
+                confirmButtonText: '確定'
+            }).then(() => {
+                // 提交測驗結果的邏輯
+                console.log('測驗完成');
+            });
+        }
+        else {
+            Swal.fire({
+                title: '測驗未完成',
+                text: '請完整填寫問卷',
+                icon: 'error',
+                confirmButtonText: '確定'
+            });
+        }
+    }
     loadQuestions();
 </script>
 {% endblock %}
