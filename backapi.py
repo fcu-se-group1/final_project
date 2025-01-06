@@ -289,12 +289,9 @@ def search_articles():
         query += ' AND users.username LIKE ?'
         args.append(f'%{username}%')
 
-    print(f"Query: {query}")
-    print(f"Args: {args}")
-
     articles = query_db(query, args)
-    print(f"Articles: {articles}")
-    
+    print(query ,args)
+    print(articles)
     if not articles:
         return jsonify({'message': '查無符合條件的文章'}), 200
 
@@ -391,12 +388,24 @@ def get_career(career_id):
 
     return jsonify({'career_id': career[0], 'type': career[1], 'description': career[2]}), 200
 
-@app.route('/history_tests/<int:user_id>', methods=['GET'])
-def get_history_tests(user_id):
+@app.route('/history_tests', methods=['GET'])
+def history_tests():
+    user_id = request.args.get('user_id')
     tests = query_db('SELECT test_id, created_at FROM career_tests WHERE user_id = ?', [user_id])
     if not tests:
         return jsonify({'message': '您尚未做過職涯測驗'}), 200
+    for i, test in enumerate(tests):
+        # 將 test 轉換為 list，這樣可以修改它的內容
+        test = list(test)
 
+        # 修改 test[1] 也就是 created_at
+        test[1] = datetime.datetime.strptime(test[1], "%Y-%m-%d %H:%M:%S")
+        test[1] = test[1].replace(tzinfo=datetime.timezone.utc)
+        test[1] = test[1].astimezone(datetime.timezone(datetime.timedelta(hours=8)))
+        test[1] = test[1].strftime("%Y-%m-%d %H:%M:%S")
+        
+        # 更新 tests 列表中的該元素
+        tests[i] = tuple(test)
     return jsonify([{'test_id': test[0], 'created_at': test[1]} for test in tests]), 200
 
 @app.route('/history_tests/detail/<int:test_id>', methods=['GET'])
