@@ -472,15 +472,15 @@ def get_favorites(user_id):
     if not favorites:
         return jsonify({'message': '您尚未收藏任何文章'}), 200
 
-    return jsonify([{'article_id': favorite[0], 'title': favorite[1], 'created_at': favorite[2]} for favorite in favorites]), 200
+    return jsonify([{'article_id': favorite[0], 'title': favorite[1], } for favorite in favorites]), 200
 
-# @app.route('/favorites/detail/<int:article_id>', methods=['GET'])
-# def get_favorite_detail(article_id):
-#     article = query_db('SELECT title, career_type, media, content, created_at, is_deleted FROM articles WHERE article_id = ?', [article_id], one=True)  # 修改這一行
-#     if not article or article[5] == 1:  # 修改這一行
-#         return jsonify({'message': '該文章已被刪除'}), 404  # 修改這一行
+@app.route('/favorites/detail/<int:article_id>', methods=['GET'])
+def get_favorite_detail(article_id):
+    article = query_db('SELECT title, career_type, media, content, created_at, is_deliete FROM articles WHERE article_id = ?', [article_id], one=True)  # 修改這一行
+    if not article or article[5] == 1:  # 修改這一行
+        return jsonify({'message': '該文章已被刪除'}), 404  # 修改這一行
 
-#     return jsonify({'title': article[0], 'career_type': article[1], 'media': article[2], 'content': article[3], 'created_at': article[4]}), 200
+    return jsonify({'message': '存在'}), 200
 
 @app.route('/careers/<type>', methods=['GET'])
 def get_career_type(type):
