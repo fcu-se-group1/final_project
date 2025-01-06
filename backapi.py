@@ -130,11 +130,11 @@ def login():
     password = data.get('password')
 
     if not username or not password:
-        return jsonify({'error': 'Missing required fields'}), 400
+        return jsonify({'error': '帳號或密碼不可空白'}), 400
 
     user = query_db('SELECT user_id, password,role,username FROM users WHERE username = ?', [username], one=True)
     if user is None or not bcrypt.check_password_hash(user[1], password):
-        return jsonify({'error': 'Invalid username or password'}), 400
+        return jsonify({'error': '帳號或密碼錯誤'}), 400
 
     return jsonify({'message': 'Login successful', 'user_id': user[0],"user_role":user[2],'user_name':user[3]}), 200
 

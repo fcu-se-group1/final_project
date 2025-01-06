@@ -64,7 +64,7 @@
         if (response.ok) {
             // 登錄成功，處理成功邏輯
             Swal.fire({
-                title: '登錄成功',
+                title: '登入成功',
                 text: `${SID}您好，歡迎回來`,
                 icon: 'success',
                 confirmButtonText: '確定'
@@ -78,7 +78,7 @@
         } else {
             // 登錄失敗，顯示錯誤信息
             Swal.fire({
-                title: '登錄失敗',
+                title: '登入失敗',
                 text: data.error,
                 icon: 'error',
                 confirmButtonText: '確定'

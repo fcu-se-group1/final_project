@@ -15,42 +15,43 @@
             <div class="col-12 card-body text-purple d-flex justify-content-center align-items-start p-4 overflow-auto" style="height: 50vh;">
                 <div class="col-lg-8 d-flex flex-column justify-content-center align-items-center" style="gap: 1rem;">
                     <div class="col-12 d-flex align-items-center">
-                        <h5 class="card-title fw-bold mb-0">標題:&nbsp;&nbsp;</h5>
+                        <h5 class="card-title fw-bold mb-0">標題&nbsp;:&nbsp;</h5>
                         <input type="text" class="form-control col" placeholder="請輸入標題..." id="articleTitle">
                     </div>
                     <div class="col-12 d-flex align-items-center">
-                        <h5 class="card-title fw-bold mb-0">職業類型:&nbsp;&nbsp;</h5>
+                        <h5 class="card-title fw-bold mb-0">職業類型&nbsp;:&nbsp;</h5> 
                         <div class="form-check col-3 mb-0">
                             <input class="form-check-input" type="radio" name="flexRadioDefault" id="realistic">
                             <label class="form-check-label" for="realistic">R實用型</label>
                         </div>
-                        <div class="form-check col mb-0">
+                        <div class="form-check col-3 mb-0">
                             <input class="form-check-input" type="radio" name="flexRadioDefault" id="investigative">
                             <label class="form-check-label" for="investigative">I研究型</label>
                         </div>
-                        <div class="form-check col mb-0">
+                        <div class="form-check col-3 mb-0">
                             <input class="form-check-input" type="radio" name="flexRadioDefault" id="artistic">
                             <label class="form-check-label" for="artistic">A藝術型</label>
                         </div>
-                        <div class="form-check col mb-0">
+                        <div class="form-check col-3 mb-0">
                             <input class="form-check-input" type="radio" name="flexRadioDefault" id="social">
                             <label class="form-check-label" for="social">S社會型</label>
                         </div>
-                        <div class="form-check col mb-0">
+                        <div class="form-check col-3 mb-0">
                             <input class="form-check-input" type="radio" name="flexRadioDefault" id="enterprising">
                             <label class="form-check-label" for="enterprising">E企業型</label>
                         </div>
-                        <div class="form-check col mb-0">
+                        <div class="form-check col-3 mb-0">
                             <input class="form-check-input" type="radio" name="flexRadioDefault" id="conventional">
                             <label class="form-check-label" for="conventional">C事務型</label>
                         </div>
                     </div>
                     <div class="col-12 d-flex align-items-center">
-                        <h5 class="card-title col-3 col-xl-2 fw-bold mb-0">內文:</h5>
-                        <input type="text" class="form-control col" placeholder="請輸入相關經驗..." id="articleContent">
+                        <h5 class="card-title col-3 col-xl-2 fw-bold mb-0">內文&nbsp;:&nbsp;</h5>
+                        <!-- <input type="text" class="form-control col" placeholder="請輸入相關經驗..." id="articleContent"> -->
+                        <textarea class="form-control col" placeholder="請輸入相關經驗..." id="articleContent"></textarea>
                     </div>
                     <div class="col-12 d-flex align-items-center">
-                        <h5 class="card-title col-3 col-xl-2 fw-bold mb-0">上傳圖片/影片:</h5>
+                        <h5 class="card-title col-3 col-xl-2 fw-bold mb-0">上傳圖片/影片&nbsp;:&nbsp;</h5>
                         <button type="button" class="btn btn-primary ms-2" onclick="uploadFile()">上傳</button>
                     </div>
                     <div class="col-12" id="fileList"></div>
