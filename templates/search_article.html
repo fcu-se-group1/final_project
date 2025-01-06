@@ -72,11 +72,22 @@
 {% endblock %}
 
 {% block content1 %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     async function searchArticles() {
         const careerTypeCheckbox = document.getElementById('checkbox1').checked;
         const keywordCheckbox = document.getElementById('checkbox2').checked;
         const usernameCheckbox = document.getElementById('checkbox3').checked;
+
+        if (!careerTypeCheckbox && !keywordCheckbox && !usernameCheckbox) {
+            Swal.fire({
+                title: '搜尋失敗',
+                text: '至少需要一個檢索條件',
+                icon: 'error',
+                confirmButtonText: '確定'
+            });
+            return;
+        }
 
         let careerType = '';
         if (careerTypeCheckbox) {
@@ -106,8 +117,17 @@
         try {
             const response = await fetch(`/search_articles?${queryParams.toString()}`);
             const data = await response.json();
-            localStorage.setItem('searchResults', JSON.stringify(data));
-            window.location.href = `/search_result`;
+            if (data.message) {
+                Swal.fire({
+                    title: '搜尋結果',
+                    text: data.message,
+                    icon: 'info',
+                    confirmButtonText: '確定'
+                });
+            } else {
+                localStorage.setItem('searchResults', JSON.stringify(data));
+                window.location.href = `/search_result`;
+            }
         } catch (error) {
             console.error('Error fetching search results:', error);
         }

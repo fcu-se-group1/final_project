@@ -11,11 +11,10 @@
                 <p id="courseCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
             </div>
             <div class="card-body col-12 text-dark p-4 d-flex justify-content-center align-items-center" id="cardBody">
-                <div class="col-12 p-0 d-flex flex-column justify-content-start align-items-start overflow-auto" style="height: 41vh; gap: 0.5rem;">
-                    <div class="col-12 d-flex align-items-center justify-content-center">
-                        <h5 class="col-4 card-title fw-bold mb-0 text-center"> </h5>
-                    </div>                    
+                <div class="vh-50 p-0 d-flex flex-column justify-content-start align-items-center overflow-auto" id="overflowContainer">
+                    <div id="history_test_record"></div>
                 </div>
+                <p id="noRecordsMessage" class="text-secondary my-3 d-none">您尚未做過職涯測驗</p>
             </div>
             <div class="card-footer px-4">
                 <div class="d-flex justify-content-end" style="gap: 2rem;">
@@ -29,6 +28,40 @@
 
 {% block content1 %}
 <script>
-    
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchHistoryTestRecords();
+    });
+
+    async function fetchHistoryTestRecords() {
+        try {
+            const response = await fetch('/api/get_history_test_records'); // 假設這是你的 API 端點
+            const data = await response.json();
+            displayHistoryTestRecords(data);
+        } catch (error) {
+            console.error('Error fetching history test records:', error);
+        }
+    }
+
+    function displayHistoryTestRecords(data) {
+        const historyTestRecordContainer = document.getElementById('history_test_record');
+        const overflowContainer = document.getElementById('overflowContainer');
+        const noRecordsMessage = document.getElementById('noRecordsMessage');
+
+        if (data.length > 0) {
+            let recordsContent = '';
+            data.forEach(record => {
+                recordsContent += `
+                    <div class="record-item">
+                        <p>測驗日期: ${record.date}</p>
+                        <p>測驗結果: ${record.result}</p>
+                    </div>
+                `;
+            });
+            historyTestRecordContainer.innerHTML = recordsContent;
+        } else {
+            noRecordsMessage.classList.remove('d-none');
+            overflowContainer.classList.add('d-none');
+        }
+    }
 </script>
 {% endblock %}
