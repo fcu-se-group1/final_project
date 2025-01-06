@@ -109,8 +109,44 @@
         fileRow.remove();
     }
 
-    function postArticle() {
-        // Your post article logic here
+    async function postArticle() {
+        const title = document.getElementById('title').value;
+        const careerType = document.querySelector('input[name="flexRadioDefault"]:checked').id;
+        const content = document.getElementById('content').value;
+        const media = document.getElementById('media').files;
+
+        if (!title || !careerType || !content) {
+            alert('請填寫所有必填欄位');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('author_id', localStorage.getItem('user_id')); // 假設用戶 ID 存儲在 localStorage 中
+        formData.append('title', title);
+        formData.append('career_type', careerType);
+        formData.append('content', content);
+
+        for (let i = 0; i < media.length; i++) {
+            formData.append('media', media[i]);
+        }
+
+        try {
+            const response = await fetch('/articles', {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                alert('文章發表成功');
+                window.location.href = '/chooseFunction';
+            } else {
+                alert(result.error || '發表文章失敗');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('發表文章失敗');
+        }
     }
 
     function autoResize(textarea) {
