@@ -39,18 +39,6 @@
             const response = await fetch(`/history_tests?user_id=${user_id}`);  // 使用 GET 請求並附加 user_id 作為查詢參數
             const data = await response.json();
             console.log(data);
-            // const data = [
-            //     { date: '2025/01/01 10:00', result: '測驗結果1', link: '/test_result/1' },
-            //     { date: '2025/02/01 11:00', result: '測驗結果2', link: '/test_result/2' },
-            //     { date: '2025/03/01 12:00', result: '測驗結果3', link: '/test_result/3' },
-            //     { date: '2025/04/01 13:00', result: '測驗結果4', link: '/test_result/4' },
-            //     { date: '2025/05/01 14:00', result: '測驗結果5', link: '/test_result/5' },
-            //     { date: '2025/01/01 10:00', result: '測驗結果1', link: '/test_result/1' },
-            //     { date: '2025/02/01 11:00', result: '測驗結果2', link: '/test_result/2' },
-            //     { date: '2025/03/01 12:00', result: '測驗結果3', link: '/test_result/3' },
-            //     { date: '2025/04/01 13:00', result: '測驗結果4', link: '/test_result/4' },
-            //     { date: '2025/05/01 14:00', result: '測驗結果5', link: '/test_result/5' }
-            // ];
             displayHistoryTestRecords(data);
         } catch (error) {
             console.error('Error fetching history test records:', error);
@@ -67,7 +55,12 @@
             data.forEach(record => {
                 recordsContent += `
                     <div class="record-item">
-                        <p><a href="${record.link}">${record.created_at}</a></p>
+                        <p><a href="{{ url_for('history_test_record_check') }}"
+                            data-test-id="{${record.test_id}}"
+                            data-time="{${record.created_at}}" 
+                            onclick="saveTestId(event)">
+                            ${record.created_at}
+                        </a></p>
                     </div>
                 `;
             });
@@ -76,6 +69,14 @@
             noRecordsMessage.classList.remove('d-none');
             overflowContainer.classList.add('d-none');
         }
+    }
+
+    function saveTestId(event) {
+        const testId = event.target.getAttribute('data-test-id');
+        localStorage.setItem('test_id', testId);
+        const test_time = event.target.getAttribute('data-time');
+        localStorage.setItem('test_time', test_time);
+        window.location.href = event.target.href;
     }
 </script>
 {% endblock %}

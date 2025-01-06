@@ -392,13 +392,13 @@ def history_tests():
         test[1] = test[1].replace(tzinfo=datetime.timezone.utc)
         test[1] = test[1].astimezone(datetime.timezone(datetime.timedelta(hours=8)))
         test[1] = test[1].strftime("%Y-%m-%d %H:%M:%S")
-        
         # 更新 tests 列表中的該元素
         tests[i] = tuple(test)
     return jsonify([{'test_id': test[0], 'created_at': test[1]} for test in tests]), 200
 
-@app.route('/history_tests/detail/<int:test_id>', methods=['GET'])
-def get_test_detail(test_id):
+@app.route('/history_test_detail', methods=['GET'])
+def history_test_detail():
+    test_id = request.args.get('test_id')
     test = query_db('SELECT result FROM career_tests WHERE test_id = ?', [test_id], one=True)
     if not test:
         return jsonify({'message': '該測驗結果不存在'}), 404
