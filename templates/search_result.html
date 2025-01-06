@@ -9,7 +9,7 @@
             <div class="card-header p-3 px-4"><h3 class="fw-bold mb-0">搜尋結果</h3></div>
             
             <div class="card-body text-purple d-flex justify-content-center align-items-center p-2">
-                <div class="col vh-50 overflow-auto">
+                <div class="col vh-50 overflow-auto" id="overflowContainer">
                     <table class="table table-bordered">
                         <thead id="tableHead">
                             <!-- Thead will be dynamically inserted here by JavaScript if data is found -->
@@ -37,22 +37,6 @@
 {% block content1 %}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // 假資料
-        const fakeData = {
-            length: 10,
-            message: '',
-            0: { career_type: 'R實用型', article_id: 1, title: '文章標題1', username: '作者1' },
-            1: { career_type: 'I研究型', article_id: 2, title: '文章標題2', username: '作者2' },
-            2: { career_type: 'A藝術型', article_id: 3, title: '文章標題3', username: '作者3' },
-            3: { career_type: 'S社會型', article_id: 4, title: '文章標題4', username: '作者4' },
-            4: { career_type: 'E企業型', article_id: 5, title: '文章標題5', username: '作者5' },
-            5: { career_type: 'C事務型', article_id: 6, title: '文章標題6', username: '作者6' },
-            6: { career_type: 'R實用型', article_id: 7, title: '文章標題7', username: '作者7' },
-            7: { career_type: 'I研究型', article_id: 8, title: '文章標題8', username: '作者8' },
-            8: { career_type: 'A藝術型', article_id: 9, title: '文章標題9', username: '作者9' },
-            9: { career_type: 'S社會型', article_id: 10, title: '文章標題10', username: '作者10' }
-        };
-        localStorage.setItem('searchResults', JSON.stringify(fakeData));
         displayResults();
     });
 
@@ -61,10 +45,11 @@
         const tableHead = document.getElementById('tableHead');
         const noResultsMessage = document.getElementById('noResultsMessage');
         const data = JSON.parse(localStorage.getItem('searchResults'));
+        const overflowContainer = document.getElementById('overflowContainer');
 
         if (data.message) {
             noResultsMessage.textContent = data.message;
-            noResultsMessage.style.display = 'block';
+            noResultsMessage.classList.remove('d-none');
         } else {
             if (data.length > 0) {
                 tableHead.innerHTML = `
@@ -75,8 +60,7 @@
                     </tr>
                 `;
                 let resultsContent = '';
-                for (let i = 0; i < data.length; i++) {
-                    const article = data[i];
+                data.forEach(article => {
                     resultsContent += `
                         <tr class="text-center">
                             <td>${article.career_type}</td>
@@ -84,11 +68,12 @@
                             <td>${article.username}</td>
                         </tr>
                     `;
-                }
+                });
                 resultsContainer.innerHTML = resultsContent;
             } else {
                 noResultsMessage.textContent = '查無符合條件的文章';
                 noResultsMessage.classList.remove('d-none');
+                overflowContainer.classList.add('d-none');   
             }
         }
     }
@@ -96,5 +81,6 @@
     function clearSelectedFunction() {
         localStorage.removeItem('selectedFunction');
     }
+
 </script>
 {% endblock %}

@@ -289,9 +289,12 @@ def search_articles():
         query += ' AND users.username LIKE ?'
         args.append(f'%{username}%')
 
+    print(f"Query: {query}")
+    print(f"Args: {args}")
+
     articles = query_db(query, args)
-    print(query ,args)
-    print(articles)
+    print(f"Articles: {articles}")
+    
     if not articles:
         return jsonify({'message': '查無符合條件的文章'}), 200
 
