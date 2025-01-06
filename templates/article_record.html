@@ -7,11 +7,11 @@
     <div class="col-12 col-md-10 col-lg-8 col-xl-6">
         <div class="card border-dark rounded-4 h-100">
             <div class="card-header d-flex justify-content-between p-3 px-4">
-                <h3 class="fw-bold mb-0">發表過的文章</h3>
+                <h1 class="fw-bold mb-0">發表過的文章</h1>
                 <p id="courseCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
             </div>
             <div class="card-body col-12 text-dark p-4 d-flex justify-content-center align-items-center" id="cardBody">
-                <div class="col-12 vh-50 p-0 d-flex flex-column justify-content-start align-items-center overflow-auto" id="overflowContainer">
+                <div class="col-12 vh-40 p-0 d-flex flex-column justify-content-start align-items-center overflow-auto" id="overflowContainer">
                     <div class="col-12" id="article_record"></div>
                 </div>
                 <p id="noRecordsMessage" class="text-secondary my-3 d-none">您尚未發表過文章</p>
@@ -68,31 +68,34 @@
 
         data.forEach(article => {
             const articleDiv = document.createElement('div');
-            articleDiv.className = 'article-record mb-3';
+            articleDiv.className = 'd-flex justify-content-center align-item-center article-record mb-3';
 
-            const titleLink = document.createElement('a');
-            titleLink.href = '#';
+            const titleLink = document.createElement('div');
             titleLink.textContent = article.title;
-            titleLink.className = 'd-block mb-1';
-            titleLink.addEventListener('click', function() {
-                localStorage.setItem('article_id', article.article_id);
-                window.location.href = '/article_content';
-            });
+            titleLink.className = 'h4 mb-0 me-5 text-decoration-none text-purple text-center fw-bold';
+            
+            const checkLink = document.createElement('a');
+            checkLink.href = `/article_content?article_id=${article.article_id}`;
+            checkLink.textContent = '查看';
+            checkLink.className = 'btn btn-sm btn-blue me-2';
+            checkLink.onclick = setSavePage();
 
             const editLink = document.createElement('a');
             editLink.href = `/edit_article?article_id=${article.article_id}`;
             editLink.textContent = '編輯';
-            editLink.className = 'btn btn-sm btn-primary me-2';
+            editLink.className = 'btn btn-sm btn-purple me-2';
 
             const deleteLink = document.createElement('a');
             deleteLink.href = '#';
             deleteLink.textContent = '刪除';
-            deleteLink.className = 'btn btn-sm btn-danger';
+            deleteLink.className = 'btn btn-sm btn-peach';
+
             deleteLink.addEventListener('click', function() {
                 deleteArticle(article.article_id);
             });
-
+            
             articleDiv.appendChild(titleLink);
+            articleDiv.appendChild(checkLink);
             articleDiv.appendChild(editLink);
             articleDiv.appendChild(deleteLink);
             articleRecordContainer.appendChild(articleDiv);
@@ -120,6 +123,10 @@
                 console.error('Error deleting article:', error);
             }
         }
+    }
+
+    function setSavePage() {
+        localStorage.setItem('savepage', window.location.href);
     }
 </script>
 {% endblock %}

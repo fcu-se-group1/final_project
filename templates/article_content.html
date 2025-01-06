@@ -20,7 +20,7 @@
             </div>
             <div class="card-footer px-4">
                 <div class="d-flex justify-content-end" style="gap: 2rem;">
-                    <a href="{{ url_for('chooseFunction') }}" class="btn btn-indigo">返回</a>
+                    <a href="#" class="btn btn-indigo" onclick="back()">返回</a>
                 </div>
             </div>
         </div>
@@ -122,6 +122,10 @@
                 commentsSection.appendChild(reCommentDiv);
             });
         });
+    }
+
+    function back() {
+        window.history.back();
     }
 </script>
 {% endblock %}
