@@ -4,7 +4,7 @@
 
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
-    <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+    <div class="col-12 col-xl-10">
         <div class="card border-dark rounded-4 h-100">
             <div class="card-header d-flex justify-content-between p-3 px-4">
                 <h3 id="articleTitle" class="fw-bold mb-0">文章標題</h3>
@@ -29,13 +29,20 @@
 {% endblock %}
 
 {% block content1 %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const articleId = 5;
         if (articleId) {
             fetchArticleDetails(articleId);
         } else {
-            alert('無法獲取文章ID');
+            Swal.fire({
+                title: '錯誤',
+                text: '無法獲取文章ID',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
         }
     });
 
@@ -52,11 +59,23 @@
             if (response.ok) {
                 displayArticleDetails(data);
             } else {
-                alert(data.error || '無法獲取文章詳情');
+                Swal.fire({
+                    title: '錯誤',
+                    text: data.error || '無法獲取文章詳情',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                });
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('無法獲取文章詳情');
+            Swal.fire({
+                title: '錯誤',
+                text: '無法獲取文章詳情',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
         }
     }
 
