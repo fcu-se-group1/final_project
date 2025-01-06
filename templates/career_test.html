@@ -18,12 +18,12 @@
             
             <div class="card-body text-purple d-flex flex-column justify-content-center align-items-center p-2 py-4" style="gap: 1rem;">
                 <div class="col-12 d-flex justify-content-center align-items-center">
-                    <h3 id="questionText" class="fw-bold mb-0">我經常被獨特的音樂旋律或視覺藝術所吸引</h3>
+                    <h3 id="questionText" class="fw-bold mb-0"> </h3>
                 </div>
                 <div class="col-6 d-flex justify-content-center align-items-center" id="agreementRow">
-                    <h5 class="col-4 fw-bold mb-0 d-flex justify-content-center">同意</h5>
-                    <span class="col-4 mx-3 d-flex justify-content-center">&lt; --- &gt;</span>
                     <h5 class="col-4 fw-bold mb-0 d-flex justify-content-center">不同意</h5>
+                    <span class="col-4 mx-3 d-flex justify-content-center">&lt; --- &gt;</span>
+                    <h5 class="col-4 fw-bold mb-0 d-flex justify-content-center">同意</h5>
                 </div>
                 <div class="col-12 d-flex justify-content-center align-items-center" id="rangeRow">
                     <input type="range" class="form-range" id="answerRange" min="1" max="5" step="1">
@@ -41,30 +41,37 @@
     </div>
 
 </div>
+
 {% endblock %}
 
 {% block content1 %}
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
+    // 定義全局變數 types
     const user_id = localStorage.getItem('user_id');
     const lastpage = localStorage.getItem('savepage');
     const types = ['A', 'C', 'E', 'I', 'R', 'S'];
     let questions = [];
     let currentQuestionIndex = 0;
     let currentSaveQuestionIndex = [];
+    let ans = Array.from({ length: 60 }, () => 0);
+    let sum = Array.from({ length: 6 }, () => 0);
 
+    // 定義加載問題的函數
     async function loadQuestions() {
         for (const type of types) {
             const response = await fetch(`/show_career_test/${type}`);
             const data = await response.json();
-            questions = questions.concat(data['選擇題'].map(q => ({ type: '選擇題', text: q })));
+            questions = questions.concat(data['選擇題'].map(q => ({ type: type, text: q })));
         }
     }
 
+    // 更新問題的函數
     function updateQuestion() {
         const question = questions[currentQuestionIndex];
         document.getElementById('questionTitle').textContent = `第 ${currentQuestionIndex + 1} 題`;
         document.getElementById('questionText').textContent = question.text;
+        console.log(question)
         const answerContainer = document.getElementById('answerContainer');
         answerContainer.innerHTML = '';
 
@@ -72,28 +79,28 @@
         rangeInput.value = 3; // 默認值為中立
     }
 
+    // 保存答案的邏輯
     function saveAnswer() {
         const rangeInput = document.getElementById('answerRange');
         if (currentSaveQuestionIndex.includes(currentQuestionIndex)) {
-            document.getElementById('progressBar').style.width = `${(currentSaveQuestionIndex.length/questions.length)*100}%`;
-        }
-        else {
+            document.getElementById('progressBar').style.width = `${(currentSaveQuestionIndex.length / questions.length) * 100}%`;
+        } else {
             currentSaveQuestionIndex.push(currentQuestionIndex);
-            document.getElementById('progressBar').style.width = `${(currentSaveQuestionIndex.length/questions.length)*100}%`;
+            document.getElementById('progressBar').style.width = `${(currentSaveQuestionIndex.length / questions.length) * 100}%`;
         }
         // 保存答案的邏輯
         console.log(`Question ${currentQuestionIndex + 1}: ${rangeInput.value}`);
+        ans[currentQuestionIndex] = parseInt(rangeInput.value);
     }
 
+    // 下一題
     function nextQuestion() {
         saveAnswer();
         if (currentQuestionIndex < questions.length - 2) {
             currentQuestionIndex++;
             updateQuestion();
             document.getElementById('prevButton').hidden = false;
-            // document.getElementById('nextButton').hidden = false;
-        }
-        else if (currentQuestionIndex < questions.length - 1) {
+        } else if (currentQuestionIndex < questions.length - 1) {
             currentQuestionIndex++;
             updateQuestion();
             document.getElementById('prevButton').hidden = false;
@@ -101,6 +108,7 @@
         }
     }
 
+    // 上一題
     function prevQuestion() {
         saveAnswer();
         if (currentQuestionIndex > 0) {
@@ -113,9 +121,25 @@
         }
     }
 
+    // 完成測驗
     function finishTest() {
         saveAnswer();
         if (document.getElementById('progressBar').style.width === '100%') {
+            for (let i = 0; i < 6; i++) {
+                for (let j = 0; j < 10; j++) {
+                    console.log(ans[i*10+j]);
+                    sum[i] += ans[i*10+j];
+                }
+            }
+            let result = {
+                'A': sum[0],
+                'C': sum[1],
+                'E': sum[2],
+                'I': sum[3],
+                'R': sum[4],
+                'S': sum[5]
+            };
+            result = JSON.stringify(result);
             Swal.fire({
                 title: '測驗完成',
                 text: '您已完成所有題目',
@@ -124,9 +148,31 @@
             }).then(() => {
                 // 提交測驗結果的邏輯
                 console.log('測驗完成');
+                window.location.href = '/career_test_result';
+                fetch('/career_test', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        user_id: user_id,
+                        result: JSON.parse(result)
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === 'Career test created successfully') {
+                        localStorage.setItem('test_id', data.test_id);
+                        window.location.href = '/career_test_result';
+                    } else {
+                        console.error('Error:', data);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
             });
-        }
-        else {
+        } else {
             Swal.fire({
                 title: '測驗未完成',
                 text: '請完整填寫問卷',
@@ -134,7 +180,13 @@
                 confirmButtonText: '確定'
             });
         }
+        
     }
-    loadQuestions();
+
+    // 開始加載問題
+    loadQuestions().then(() => {
+        updateQuestion();
+    });
+
 </script>
 {% endblock %}
