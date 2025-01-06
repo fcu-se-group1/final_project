@@ -38,9 +38,13 @@
 
     async function fetchTestResults() {
         try {
-            const response = await fetch('/api/get_test_results'); // 假設這是你的 API 端點
-            const data = await response.json();
-            displayResults(data);
+            const result = localStorage.getItem('result');
+            console.log(result);  // 查看獲取的 result
+            // 解析 JSON 字串為對象
+            const resultData = JSON.parse(result);
+
+            // 顯示測驗結果
+            displayResults(resultData);
         } catch (error) {
             console.error('Error fetching test results:', error);
         }
@@ -48,10 +52,19 @@
 
     function displayResults(data) {
         const tableElement = document.getElementById('table');
-        let tableContent = '<table class="table table-bordered"><thead><tr><th>類型</th><th>分數</th></tr></thead><tbody>';
+        
+        // 檢查資料格式，防止因為格式錯誤而發生錯誤
+        if (!data || typeof data !== 'object') {
+            console.error('Invalid data format:', data);
+            return;
+        }
 
-        data.results.forEach(result => {
-            tableContent += `<tr><td>${result.type}</td><td>${result.score}</td></tr>`;
+        let tableContent = '<table class="table table-bordered"><thead><tr><th>類型</th><th>分數</th></tr></thead><tbody>';
+        
+        // 假設 resultData 是一個物件，裡面包含類型和分數
+        // 假設 data 是一個物件，包含 'A', 'C', 'E', 'I', 'R', 'S' 等屬性，每個屬性是對應的分數
+        Object.keys(data).forEach(type => {
+            tableContent += `<tr><td>${type}</td><td>${data[type]}</td></tr>`;
         });
 
         tableContent += '</tbody></table>';
