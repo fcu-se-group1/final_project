@@ -312,7 +312,7 @@ def get_article_details(article_id):
         SELECT articles.article_id, articles.author_id, articles.title, articles.career_type, articles.media, articles.content, articles.created_at, users.username
         FROM articles
         JOIN users ON articles.author_id = users.user_id
-        WHERE articles.article_id = ? AND is_deleted = 0
+        WHERE articles.article_id = ? AND is_deliete = 0
     ''', [article_id], one=True)
 
     if not article:
@@ -345,13 +345,24 @@ def get_article_details(article_id):
             })
         return re_comments
 
+    # 打開媒體檔案
+    media_contents = []
+    if(article[4] != None):
+        media_files = json.loads(article[4])
+        for media_file in media_files:
+            with open(media_file, 'rb') as f:
+                media_contents.append({
+                    'filename': os.path.basename(media_file),
+                    'content': f.read().decode('latin1')  # 使用latin1編碼以避免二進制數據損壞
+                })
+
     # 構建返回結果
     result = {
         'article_id': article[0],
         'author_id': article[1],
         'title': article[2],
         'career_type': article[3],
-        'media': article[4],
+        'media': media_contents,
         'content': article[5],
         'created_at': article[6],
         'username': article[7],
