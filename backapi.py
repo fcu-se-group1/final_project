@@ -37,6 +37,10 @@ def article_record():
 def career_test_result():
     return render_template('career_test_result.html')
 
+@app.route('/career_test_start')
+def career_test_start():
+    return render_template('career_test_start.html')
+
 @app.route('/career_test')
 def career_test():
     return render_template('career_test.html')
