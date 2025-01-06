@@ -31,10 +31,10 @@
 </style>
 <script>
     function returnToHomepage() {
-        const identity = localStorage.getItem('identity');
-        if (identity === 'seeker') {
+        const identity = localStorage.getItem('user_role');
+        if (identity === 'job_seeker') {
             window.location.href = "{{ url_for('seeker_personal_homepage') }}";
-        } else if (identity === 'social') {
+        } else if (identity === 'professional') {
             window.location.href = "{{ url_for('social_personal_homepage') }}";
         }
     }

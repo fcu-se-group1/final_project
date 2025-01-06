@@ -108,8 +108,7 @@
                     icon: 'success',
                     confirmButtonText: '確定'
                 }).then(() => {
-                    // 提交測驗結果的邏輯
-                    console.log('測驗完成');
+                    window.location.href = "{{ url_for('career_test_result') }}";
                 });
             }
             else {
