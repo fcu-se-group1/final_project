@@ -91,7 +91,7 @@
             currentQuestionIndex++;
             updateQuestion();
             document.getElementById('prevButton').hidden = false;
-            document.getElementById('nextButton').hidden = false;
+            // document.getElementById('nextButton').hidden = false;
         }
         else if (currentQuestionIndex < questions.length - 1) {
             currentQuestionIndex++;
@@ -106,7 +106,7 @@
         if (currentQuestionIndex > 0) {
             currentQuestionIndex--;
             updateQuestion();
-            document.getElementById('nextButton').textContent = '下一題';
+            document.getElementById('nextButton').hidden = false;
             if (currentQuestionIndex === 0) {
                 document.getElementById('prevButton').hidden = true;
             }
@@ -114,6 +114,7 @@
     }
 
     function finishTest() {
+        saveAnswer();
         if (document.getElementById('progressBar').style.width === '100%') {
             Swal.fire({
                 title: '測驗完成',
