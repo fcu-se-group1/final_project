@@ -4,6 +4,8 @@ import sqlite3
 import json
 import os
 from flask_bcrypt import Bcrypt
+import json
+import random
 
 app = Flask(__name__, static_folder='static', template_folder='templates')
 bcrypt = Bcrypt(app)
@@ -148,10 +150,15 @@ def show_career_test(filename):
     if not os.path.exists(filepath):
         return jsonify({'error': 'File not found'}), 404
 
-    with open(filepath, 'r',encoding="utf-8") as f:
+    with open(filepath, 'r', encoding="utf-8") as f:
         data = json.load(f)
 
-    return jsonify(data), 200
+    questions = data.get('選擇題', [])
+    if len(questions) < 10:
+        return jsonify({'error': 'Not enough questions in the file'}), 400
+
+    selected_questions = random.sample(questions, 10)
+    return jsonify({'選擇題': selected_questions}), 200
 
 @app.route('/career_test', methods=['POST'])
 def create_career_test():

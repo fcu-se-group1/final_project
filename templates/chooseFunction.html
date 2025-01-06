@@ -89,8 +89,8 @@
 {% block content1 %}
     <script>
         function chooseFunction(functionName){
-            const SID = localStorage.getItem('SID');
-            const identity = localStorage.getItem('identity');
+            const SID = localStorage.getItem('user_id');
+            const identity = localStorage.getItem('user_role');
             if ((functionName === 'function_postArticle' || functionName === 'function_personalHomepage') && !SID) {
                 Swal.fire({
                     title: '無法使用此功能',
@@ -104,9 +104,9 @@
                 // 根據功能名稱導航到相應的頁面
                 if (functionName === 'function_postArticle') {
                     window.location.href = "{{ url_for('post_article') }}";
-                } else if (functionName === 'function_personalHomepage' && identity === 'seeker') {
+                } else if (functionName === 'function_personalHomepage' && identity === 'job_seeker') {
                     window.location.href = "{{ url_for('seeker_personal_homepage') }}";
-                }else if (functionName === 'function_personalHomepage' && identity === 'social') {
+                }else if (functionName === 'function_personalHomepage' && identity === 'professional') {
                     window.location.href = "{{ url_for('social_personal_homepage') }}";
                 }
             }
