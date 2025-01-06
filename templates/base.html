@@ -60,15 +60,15 @@
 <script>
     
     document.addEventListener('DOMContentLoaded', function() {
-        const user_id = localStorage.getItem('SID');
+        const user_id = localStorage.getItem('user_id');
         const authButton = document.getElementById('authButton');
 
         if (user_id) {
             authButton.textContent = '登出';
             authButton.href = '#';
             authButton.addEventListener('click', function() {
-                localStorage.removeItem('SID');
-                localStorage.removeItem('identity');
+                localStorage.removeItem('user_id');
+                localStorage.removeItem('user_role');
                 localStorage.removeItem('selectedFunction');
                 location.reload();
                 window.location.href = '/';
