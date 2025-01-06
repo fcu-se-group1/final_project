@@ -24,12 +24,12 @@
                 <div class="col-12 d-flex align-items-center">
                     <h5 class="card-title col-3 col-xl-2 fw-bold mb-0">身分:</h5>
                     <div class="form-check col-3 mb-0">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="seeker" checked>
+                        <input class="form-check-input" type="radio" name="identity" id="seeker" value="job_seeker" checked>
                         <label class="form-check-label" for="seeker">求職者</label>
                     </div>
 
                     <div class="form-check col mb-0">
-                        <input class="form-check-input" type="radio" name="flexRadioDefault" id="social">
+                        <input class="form-check-input" type="radio" name="identity" id="social" value="professional">
                         <label class="form-check-label" for="social">社會人士</label>
                     </div>
 
@@ -40,7 +40,7 @@
         <div class="card-footer px-4">
             <div class="d-flex justify-content-end" style="gap: 2rem;">
                 <a href="{{ url_for('log_in') }}" class="btn btn-indigo" id="backButton">返回</a>
-                <a href="#" id="confirmButton" class="btn btn-indigo" onclick="judge()">確認</a>
+                <a href="#" id="confirmButton" class="btn btn-indigo" onclick="register()">確認</a>
             </div>
         </div>
 
@@ -53,55 +53,41 @@
 <script>
     const lastpage = localStorage.getItem('savepage');
 
-    async function judge() {
+    async function register() {
         const SID = document.getElementById('SID').value;
         const PD = document.getElementById('PD').value;
-        const identity = document.querySelector('input[name="flexRadioDefault"]:checked').id;
+        const identity = document.querySelector('input[name="identity"]:checked').value;
 
-         // 假資料庫檢查
-        const existingUsers = ['D1149809', 'D1149810']; // 假設這些帳號已存在
+        // 發送請求到 /register API
+        const response = await fetch('/register', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ username: SID, password: PD, role: identity })
+        });
 
-        // 檢查帳號是否已存在
-        // const response = await fetch('/check_username', {
-        //     method: 'POST',
-        //     headers: {
-        //         'Content-Type': 'application/json'
-        //     },
-        //     body: JSON.stringify({ SID })
-        // });
+        const data = await response.json();
 
-        // const result = await response.json();
-        const result = { exists: existingUsers.includes(SID) };
-
-        if (result.exists) {
-            Swal.fire({
-                title: '註冊失敗',
-                text: '帳號名稱已被使用',
-                icon: 'error',
-                confirmButtonText: '確定'
-            });
-        } else {
-            // 儲存新帳號
-            // await fetch('/register', {
-            //     method: 'POST',
-            //     headers: {
-            //         'Content-Type': 'application/json'
-            //     },
-            //     body: JSON.stringify({ SID, PD, identity })
-            // });
-
+        if (response.ok) {
+            // 註冊成功，顯示成功信息並重定向
             Swal.fire({
                 title: '註冊成功',
-                text: `${SID}您好，歡迎使用本系統`,
+                text: `${SID}您好，歡迎使用本系統，請重新登入`,
                 icon: 'success',
                 confirmButtonText: '確定'
             }).then(() => {
-                localStorage.setItem('SID', SID);
-                localStorage.setItem('identity', identity);
-                window.location.href = lastpage || '/';
+                window.location.href = '/log_in';
+            });
+        } else {
+            // 註冊失敗，顯示錯誤信息
+            Swal.fire({
+                title: '註冊失敗',
+                text: data.error,
+                icon: 'error',
+                confirmButtonText: '確定'
             });
         }
     }
-
 </script>
 {% endblock %}

@@ -123,7 +123,7 @@ def register():
 
     return jsonify({'message': 'User registered successfully'}), 201
 
-@app.route('/login', methods=['POST'])
+@app.route('/login_check', methods=['POST'])
 def login():
     data = request.get_json()
     username = data.get('username')

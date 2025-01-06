@@ -26,6 +26,8 @@
                 <div class="col-12 d-none justify-content-center align-items-center" id="rangeRow">
                     <input type="range" class="form-range" id="answerRange" min="1" max="5" step="1">
                 </div>
+                <div class="col-12 d-none justify-content-center align-items-center" id="answerContainer">
+                </div>
             </div>
 
             <div class="card-footer px-4 d-flex justify-content-center" style="gap: 2rem;">
@@ -41,30 +43,24 @@
 {% endblock %}
 
 {% block content1 %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
-    const questions = [
-        "你喜歡與人合作嗎？",
-        "你喜歡解決複雜的問題嗎？",
-        "你喜歡學習新技術嗎？",
-        "你喜歡幫助他人嗎？",
-        "你喜歡挑戰自我嗎？"
-    ]; // 假資料
-
+    const user_id = localStorage.getItem('user_id');
+    const lastpage = localStorage.getItem('savepage');
+    const types = ['A', 'C', 'E', 'I', 'R', 'S'];
+    let questions = [];
     let currentQuestionIndex = 0;
-    const totalQuestions = questions.length;
-    const answers = Array(totalQuestions).fill(null);
 
-    function updateQuestion() {
-        document.getElementById('questionTitle').textContent = `第 ${currentQuestionIndex + 1} 題`;
-        document.getElementById('questionText').textContent = questions[currentQuestionIndex];
-        document.getElementById('progressBar').style.width = `${((currentQuestionIndex + 1) / totalQuestions) * 100}%`;
-        document.getElementById('answerRange').value = answers[currentQuestionIndex] || 3;
-        document.getElementById('prevButton').hidden = currentQuestionIndex === 0;
-        document.getElementById('nextButton').textContent = currentQuestionIndex === totalQuestions - 1 ? '填寫完成' : '下一題';
+    async function loadQuestions() {
+        for (const type of types) {
+            const response = await fetch(`/show_career_test/${type}`);
+            const data = await response.json();
+            questions = questions.concat(data['是非題'].map(q => ({ type: '是非題', text: q })));
+            questions = questions.concat(data['選擇題'].map(q => ({ type: '選擇題', text: q })));
+        }
     }
 
     function checkLogin() {
-        const user_id = localStorage.getItem('SID');
         if (!user_id) {
             Swal.fire({
                 title: '無法進行測驗',
@@ -79,52 +75,83 @@
     }
 
     function startTest() {
-        document.getElementById('questionTitle').textContent = `第 1 題`;
-        document.getElementById('questionText').textContent = questions[0];
-        document.getElementById('progressContainer').hidden = false;
-        document.getElementById('agreementRow').className = 'col-6 d-flex justify-content-center align-items-center';
-        document.getElementById('rangeRow').className = 'col-12 d-flex justify-content-center align-items-center';
-        document.getElementById('prevButton').hidden = true;
         document.getElementById('nextButton').textContent = '下一題';
         document.getElementById('nextButton').onclick = nextQuestion;
         document.getElementById('backButton').hidden = true;
+        document.getElementById('prevButton').hidden = true;
+        document.getElementById('progressContainer').hidden = false;
         updateQuestion();
+    }
+
+    function updateQuestion() {
+        const question = questions[currentQuestionIndex];
+        document.getElementById('questionTitle').textContent = `第 ${currentQuestionIndex + 1} 題`;
+        document.getElementById('questionText').textContent = question.text;
+        const answerContainer = document.getElementById('answerContainer');
+        answerContainer.innerHTML = '';
+
+        if (question.type === '是非題') {
+            const yesButton = document.createElement('button');
+            yesButton.textContent = '是';
+            yesButton.onclick = () => saveAnswer('是');
+            answerContainer.appendChild(yesButton);
+
+            const noButton = document.createElement('button');
+            noButton.textContent = '否';
+            noButton.onclick = () => saveAnswer('否');
+            answerContainer.appendChild(noButton);
+        } else if (question.type === '選擇題') {
+            const select = document.createElement('select');
+            const options = ['非常不同意', '不同意', '中立', '同意', '非常同意'];
+            options.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option;
+                opt.textContent = option;
+                select.appendChild(opt);
+            });
+            answerContainer.appendChild(select);
+
+            const submitButton = document.createElement('button');
+            submitButton.textContent = '提交';
+            submitButton.onclick = () => saveAnswer(select.value);
+            answerContainer.appendChild(submitButton);
+        }
+    }
+
+    function saveAnswer(answer) {
+        // 保存答案的邏輯
+        console.log(`Question ${currentQuestionIndex + 1}: ${answer}`);
+        nextQuestion();
+    }
+
+    function nextQuestion() {
+        if (currentQuestionIndex < questions.length - 1) {
+            currentQuestionIndex++;
+            updateQuestion();
+            document.getElementById('prevButton').hidden = false;
+        } else {
+            Swal.fire({
+                title: '測驗完成',
+                text: '您已完成所有題目',
+                icon: 'success',
+                confirmButtonText: '確定'
+            }).then(() => {
+                // 提交測驗結果的邏輯
+                console.log('測驗完成');
+            });
+        }
     }
 
     function prevQuestion() {
         if (currentQuestionIndex > 0) {
-            answers[currentQuestionIndex] = document.getElementById('answerRange').value;
             currentQuestionIndex--;
             updateQuestion();
-        }
-    }
-
-    function nextQuestion() {
-        answers[currentQuestionIndex] = document.getElementById('answerRange').value;
-        if (currentQuestionIndex < totalQuestions - 1) {
-            currentQuestionIndex++;
-            updateQuestion();
-        } else {
-            if (answers.includes(null)) {
-                Swal.fire({
-                    title: '測驗未完成',
-                    text: '請完整填寫問卷',
-                    icon: 'error',
-                    confirmButtonText: '確定',
-                    scrollbarPadding: false
-                });
-            } else {
-                Swal.fire({
-                    title: '測驗完成',
-                    text: '感謝您的填寫',
-                    icon: 'success',
-                    confirmButtonText: '確定',
-                    scrollbarPadding: false
-                }).then(() => {
-                    window.location.href = "{{ url_for('career_test_result') }}";
-                });
+            if (currentQuestionIndex === 0) {
+                document.getElementById('prevButton').hidden = true;
             }
         }
     }
+
+    loadQuestions();
 </script>
 {% endblock %}
