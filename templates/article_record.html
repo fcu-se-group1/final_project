@@ -11,14 +11,10 @@
                 <p id="courseCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
             </div>
             <div class="card-body col-12 text-dark p-4 d-flex justify-content-center align-items-center" id="cardBody">
-                <div class="col-12 p-0 d-flex flex-column justify-content-start align-items-start overflow-auto" style="height: 41vh; gap: 0.5rem;">
-                    <div class="col-12 d-flex align-items-center">
-                        <h5 class="col-4 card-title fw-bold mb-0 d-flex justify-content-end">課程描述:&nbsp;&nbsp;</h5>
-                        <div class="col-8 pe-3">
-                            <textarea class="form-control no-scrollbar" id="courseDescription" rows="1" oninput="autoResize(this)" readonly></textarea>
-                        </div>
-                    </div>
+                <div class="col-12 vh-50 p-0 d-flex flex-column justify-content-start align-items-center overflow-auto" id="overflowContainer">
+                    <div class="col-12" id="article_record"></div>
                 </div>
+                <p id="noRecordsMessage" class="text-secondary my-3 d-none">您尚未發表過文章</p>
             </div>
             <div class="card-footer px-4">
                 <div class="d-flex justify-content-end" style="gap: 2rem;">
@@ -31,10 +27,51 @@
 {% endblock %}
 
 {% block content1 %}
-<style>
-
-</style>
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchArticleRecords();
+    });
 
+    async function fetchArticleRecords() {
+        try {
+            // 假資料
+            const data = [
+                { title: '文章標題1', viewLink: '/view_article/1', editLink: '/edit_article/1', deleteLink: '/delete_article/1' },
+                { title: '文章標題2', viewLink: '/view_article/2', editLink: '/edit_article/2', deleteLink: '/delete_article/2' },
+                { title: '文章標題3', viewLink: '/view_article/3', editLink: '/edit_article/3', deleteLink: '/delete_article/3' },
+                { title: '文章標題4', viewLink: '/view_article/4', editLink: '/edit_article/4', deleteLink: '/delete_article/4' },
+                { title: '文章標題5', viewLink: '/view_article/5', editLink: '/edit_article/5', deleteLink: '/delete_article/5' }
+            ];
+            displayArticleRecords(data);
+        } catch (error) {
+            console.error('Error fetching article records:', error);
+        }
+    }
+
+    function displayArticleRecords(data) {
+        const articleRecordContainer = document.getElementById('article_record');
+        const overflowContainer = document.getElementById('overflowContainer');
+        const noRecordsMessage = document.getElementById('noRecordsMessage');
+
+        if (data.length > 0) {
+            let recordsContent = '';
+            data.forEach(record => {
+                recordsContent += `
+                    <div class="col record-item d-flex justify-content-center align-items-center w-100 mb-2">
+                        <span class="me-2">${record.title}</span>
+                        <div>
+                            <a href="${record.viewLink}" class="btn btn-blue btn-sm mx-2">查看</a>
+                            <a href="${record.editLink}" class="btn btn-purple btn-sm me-2">編輯</a>
+                            <a href="${record.deleteLink}" class="btn btn-peach btn-sm">刪除</a>
+                        </div>
+                    </div>
+                `;
+            });
+            articleRecordContainer.innerHTML = recordsContent;
+        } else {
+            noRecordsMessage.classList.remove('d-none');
+            overflowContainer.classList.add('d-none');
+        }
+    }
 </script>
 {% endblock %}
