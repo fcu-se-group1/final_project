@@ -132,14 +132,15 @@
                 }
             }
             let result = {
-                'A': sum[0],
-                'C': sum[1],
-                'E': sum[2],
-                'I': sum[3],
-                'R': sum[4],
-                'S': sum[5]
+                'A 藝術型': sum[0],
+                'C 事務型': sum[1],
+                'E 企業型': sum[2],
+                'I 研究型': sum[3],
+                'R 實用型': sum[4],
+                'S 社會型': sum[5]
             };
             result = JSON.stringify(result);
+            localStorage.setItem('result', result);
             Swal.fire({
                 title: '測驗完成',
                 text: '您已完成所有題目',

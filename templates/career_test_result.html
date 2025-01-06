@@ -38,18 +38,16 @@
 
     async function fetchTestResults() {
         try {
-            const test_id = localStorage.getItem('test_id');
-            const response = await fetch('/history_tests/detail/<int:test_id>');
-            const resultData = await response.json();
-            console.log(resultData);
-            // 顯示測驗結果
+            const result = localStorage.getItem('result');
+            console.log(result);
+            const resultData = JSON.parse(result);
             displayResults(resultData);
         } catch (error) {
             console.error('Error fetching test results:', error);
         }
     }
 
-    function displayResults(data) {
+    function displayResults(data) { 
         const tableElement = document.getElementById('table');
         
         // 檢查資料格式，防止因為格式錯誤而發生錯誤
@@ -58,17 +56,24 @@
             return;
         }
 
-        let tableContent = '<table class="table table-bordered"><thead><tr><th>類型</th><th>分數</th></tr></thead><tbody>';
+        // 將資料轉換為一個陣列，並根據分數排序
+        const sortedData = Object.entries(data)
+            .map(([type, score]) => ({ type, score })) // 轉換為物件陣列
+            .sort((a, b) => b.score - a.score); // 根據分數從大到小排序
+
+        let tableContent = '<table class="table table-bordered"><thead><tr><th style="text-align: center;">類型</th><th style="text-align: center;">分數</th><th style="text-align: center;">備註</th></tr></thead><tbody>';
         
-        // 假設 resultData 是一個物件，裡面包含類型和分數
-        // 假設 data 是一個物件，包含 'A', 'C', 'E', 'I', 'R', 'S' 等屬性，每個屬性是對應的分數
-        Object.keys(data).forEach(type => {
-            tableContent += `<tr><td>${type}</td><td>${data[type]}</td></tr>`;
+        // 選擇前三個分數最高的類型
+        sortedData.forEach((item, index) => {
+            const annotation = index < 3 ? '*' : ''; // 前三名顯示 *，其餘顯示空白
+            tableContent += `<tr><td style="text-align: center;">${item.type}</td><td style="text-align: center;">${item.score}</td><td style="text-align: center;">${annotation}</td></tr>`;
         });
 
         tableContent += '</tbody></table>';
         tableElement.innerHTML = tableContent;
     }
+
+
 
     function clearSelectedFunction() {
         localStorage.removeItem('selectedFunction');
