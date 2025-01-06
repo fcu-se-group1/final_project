@@ -8,12 +8,18 @@
         <div class="card border-purple rounded-4 h-100">
             <div class="card-header p-3 px-4"><h3 class="fw-bold mb-0">搜尋結果</h3></div>
             
-            <div class="card-body text-secondary d-flex justify-content-center align-items-center p-2">
-                <div class="d-flex flex-column justify-content-center align-items-start my-3" style="gap: 0.5rem;">
-                    <div class="col-12 d-flex justify-content-center align-items-center">
-                        <div id="resultsContainer" class="fw-bold mb-0"></div>
-                    </div>
+            <div class="card-body text-purple d-flex justify-content-center align-items-center p-2">
+                <div style="overflow: auto;">
+                    <table class="table table-bordered">
+                        <thead id="tableHead">
+                            <!-- Thead will be dynamically inserted here by JavaScript if data is found -->
+                        </thead>
+                        <tbody id="courseTableBody">
+                            <!-- Rows will be dynamically inserted here by JavaScript -->
+                        </tbody>
+                    </table>
                 </div>
+                <p id="noResultsMessage" class="d-none text-center text-purple mb-0"></p>
             </div>
 
             <div class="card-footer px-4">
@@ -34,19 +40,39 @@
         displayResults();
     });
 
-    function displayResults() {
-        const resultsContainer = document.getElementById('resultsContainer');
+    async function displayResults() {
+        const resultsContainer = document.getElementById('courseTableBody');
+        const tableHead = document.getElementById('tableHead');
+        const noResultsMessage = document.getElementById('noResultsMessage');
         const data = JSON.parse(localStorage.getItem('searchResults'));
 
         if (data.message) {
-            resultsContainer.innerHTML = `<p>${data.message}</p>`;
+            noResultsMessage.textContent = data.message;
+            noResultsMessage.style.display = 'block';
         } else {
-            let resultsContent = '<ul>';
-            data.forEach(article => {
-                resultsContent += `<li><a href="/article_details/${article.article_id}">${article.title}</a> by ${article.username}</li>`;
-            });
-            resultsContent += '</ul>';
-            resultsContainer.innerHTML = resultsContent;
+            if (data.length > 0) {
+                tableHead.innerHTML = `
+                    <tr class="text-center">
+                        <th class="col-3">類型</th>
+                        <th class="col">文章標題</th>
+                        <th class="col-3">作者</th>
+                    </tr>
+                `;
+                let resultsContent = '';
+                data.forEach(article => {
+                    resultsContent += `
+                        <tr class="text-center">
+                            <td>${article.career_type}</td>
+                            <td><a href="/article_details/${article.article_id}">${article.title}</a></td>
+                            <td>${article.username}</td>
+                        </tr>
+                    `;
+                });
+                resultsContainer.innerHTML = resultsContent;
+            } else {
+                noResultsMessage.textContent = '查無符合條件的文章';
+                noResultsMessage.classList.remove('d-none');
+            }
         }
     }
 
