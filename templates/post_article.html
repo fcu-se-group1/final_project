@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Post article{% endblock %}
+{% block title %}Post Article{% endblock %}
 
 {% block content %}
 <style>
@@ -82,19 +82,23 @@
 
 {% block content1 %}
 <script>
+    let uploadedFiles = [];
+
     function uploadFile() {
         const fileInput = document.createElement('input');
         fileInput.type = 'file';
+        fileInput.accept = '.jpg, .jpeg, .mp4'; // 只允許 JPG 和 MP4 文件
         fileInput.style.display = 'none';
         fileInput.onchange = function(event) {
             const file = event.target.files[0];
             if (file) {
+                uploadedFiles.push(file);
                 const fileList = document.getElementById('fileList');
                 const fileRow = document.createElement('div');
                 fileRow.className = 'd-flex align-items-center justify-content-between mt-2';
                 fileRow.innerHTML = `
                     <span>${file.name}</span>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="removeFile(this)">刪除</button>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeFile(this, '${file.name}')">刪除</button>
                 `;
                 fileList.appendChild(fileRow);
             }
@@ -104,21 +108,23 @@
         document.body.removeChild(fileInput);
     }
 
-    function removeFile(button) {
+    function removeFile(button, fileName) {
         const fileRow = button.parentElement;
         fileRow.remove();
+        uploadedFiles = uploadedFiles.filter(file => file.name !== fileName);
     }
 
     async function postArticle() {
-        const title = document.getElementById('title').value;
-        const careerType = document.querySelector('input[name="flexRadioDefault"]:checked').id;
-        const content = document.getElementById('content').value;
-        const media = document.getElementById('media').files;
+        const title = document.getElementById('articleTitle').value;
+        const careerTypeElement = document.querySelector('input[name="flexRadioDefault"]:checked');
+        const content = document.getElementById('articleContent').value;
 
-        if (!title || !careerType || !content) {
+        if (!title || !careerTypeElement || !content) {
             alert('請填寫所有必填欄位');
             return;
         }
+
+        const careerType = careerTypeElement.id;
 
         const formData = new FormData();
         formData.append('author_id', localStorage.getItem('user_id')); // 假設用戶 ID 存儲在 localStorage 中
@@ -126,8 +132,8 @@
         formData.append('career_type', careerType);
         formData.append('content', content);
 
-        for (let i = 0; i < media.length; i++) {
-            formData.append('media', media[i]);
+        for (let i = 0; i < uploadedFiles.length; i++) {
+            formData.append('media', uploadedFiles[i]);
         }
 
         try {
