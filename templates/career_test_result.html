@@ -38,11 +38,10 @@
 
     async function fetchTestResults() {
         try {
-            const result = localStorage.getItem('result');
-            console.log(result);  // 查看獲取的 result
-            // 解析 JSON 字串為對象
-            const resultData = JSON.parse(result);
-
+            const test_id = localStorage.getItem('test_id');
+            const response = await fetch('/history_tests/detail/<int:test_id>');
+            const resultData = await response.json();
+            console.log(resultData);
             // 顯示測驗結果
             displayResults(resultData);
         } catch (error) {

@@ -165,7 +165,6 @@ def create_career_test():
     data = request.get_json()
     user_id = data.get('user_id')
     result = data.get('result')
-    print(result)
 
     if not user_id or not result:
         return jsonify({'error': 'Missing user_id or result'}), 400
@@ -394,6 +393,7 @@ def get_test_detail(test_id):
 
     with open(test[0], 'r') as f:
         result = json.load(f)
+        print(result)
 
     return jsonify(result), 200
 
