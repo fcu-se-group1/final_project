@@ -4,12 +4,12 @@
 
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
-    <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+    <div class="col-12 col-lg-10 col-xl-8">
         <div class="card border-purple rounded-4 h-100">
             <div class="card-header p-3 px-4"><h3 class="fw-bold mb-0">搜尋結果</h3></div>
             
             <div class="card-body text-purple d-flex justify-content-center align-items-center p-2">
-                <div style="overflow: auto;">
+                <div class="col vh-50 overflow-auto" id="overflowContainer">
                     <table class="table table-bordered">
                         <thead id="tableHead">
                             <!-- Thead will be dynamically inserted here by JavaScript if data is found -->
@@ -23,7 +23,7 @@
             </div>
 
             <div class="card-footer px-4">
-                <div class="d-flex justify-content-center" style="gap: 2rem;">
+                <div class="d-flex justify-content-end" style="gap: 2rem;">
                     <a href="{{ url_for('search_article') }}" class="btn btn-indigo">返回</a>
                     <a href="{{ url_for('chooseFunction') }}" id="checkButton" class="btn btn-indigo" onclick="clearSelectedFunction()">確認</a>
                 </div>
@@ -45,10 +45,11 @@
         const tableHead = document.getElementById('tableHead');
         const noResultsMessage = document.getElementById('noResultsMessage');
         const data = JSON.parse(localStorage.getItem('searchResults'));
+        const overflowContainer = document.getElementById('overflowContainer');
 
         if (data.message) {
             noResultsMessage.textContent = data.message;
-            noResultsMessage.style.display = 'block';
+            noResultsMessage.classList.remove('d-none');
         } else {
             if (data.length > 0) {
                 tableHead.innerHTML = `
@@ -72,6 +73,7 @@
             } else {
                 noResultsMessage.textContent = '查無符合條件的文章';
                 noResultsMessage.classList.remove('d-none');
+                overflowContainer.classList.add('d-none');   
             }
         }
     }
@@ -79,5 +81,6 @@
     function clearSelectedFunction() {
         localStorage.removeItem('selectedFunction');
     }
+
 </script>
 {% endblock %}
