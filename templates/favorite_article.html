@@ -68,17 +68,27 @@
 
         data.forEach(article => {
             const articleDiv = document.createElement('div');
-            articleDiv.className = 'favorite-article mb-3';
+            articleDiv.className = 'd-flex justify-content-center align-item-center favorite-article mb-3';
 
             const titleLink = document.createElement('a');
             titleLink.href = '#';
             titleLink.textContent = article.title;
-            titleLink.className = 'd-block mb-1';
+            titleLink.className = 'h4 me-5 fw-bold d-block mb-1';
+            titleLink.style.color = 'blue';
             titleLink.addEventListener('click', function() {
                 checkArticleExists(article.article_id);
             });
 
+            const deleteLink = document.createElement('a');
+            deleteLink.href = '#';
+            deleteLink.textContent = '取消收藏';
+            deleteLink.className = 'btn btn-sm btn-peach';
+            deleteLink.addEventListener('click', function() {
+                deleteFavoriteArticle(article.article_id);
+            });
+
             articleDiv.appendChild(titleLink);
+            articleDiv.appendChild(deleteLink);
             favoriteArticlesContainer.appendChild(articleDiv);
         });
     }
@@ -102,5 +112,32 @@
             console.error('Error checking article existence:', error);
         }
     }
+
+    async function deleteFavoriteArticle(articleId) {
+    try {
+        const userId = localStorage.getItem('user_id');
+        const response = await fetch('/favorites/delete', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                user_id: userId,
+                article_id: articleId
+            })
+        });
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('取消收藏成功');
+            window.location.reload();
+        } else {
+            alert(data.error || '取消收藏失敗');
+        }
+    } catch (error) {
+        console.error('Error deleting favorite article:', error);
+    }
+}
+
 </script>
 {% endblock %}
