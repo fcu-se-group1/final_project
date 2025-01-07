@@ -546,5 +546,20 @@ def delete_favorite():
 def get_media(filename):
     return send_from_directory('media', filename)
 
+@app.route('/favorites/check', methods=['POST'])
+def check_favorite():
+    data = request.json
+    user_id = data.get('user_id')
+    article_id = data.get('article_id')
+
+    if not user_id or not article_id:
+        return jsonify({'error': '缺少必要的參數'}), 400
+
+    favorite = query_db('SELECT * FROM favorites WHERE user_id = ? AND article_id = ?', [user_id, article_id], one=True)
+    print(favorite)
+    if favorite:
+        return jsonify({'message': '已收藏'}), 200
+    else:
+        return jsonify({'message': '未收藏'}), 200
 if __name__ == '__main__':
     app.run(debug=True)
