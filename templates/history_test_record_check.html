@@ -4,11 +4,11 @@
 
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
-    <div class="col-lg-4">
+    <div class="col-lg-6">
         <div class="card border-purple rounded-4 h-100">
             <div class="card-header p-3 px-4"><h3 id="test_result" class="fw-bold mb-0"> </h3></div>
             
-            <div class="card-body text-secondary d-flex justify-content-center align-items-center p-2">
+            <div class="card-body text-secondary d-flex justify-content-center align-items-start p-2 overflow-auto vh-50">
                 <div class="d-flex flex-column justify-content-center align-items-start my-3" style="gap: 0.5rem;">
                     <div class="col-12 d-flex justify-content-center align-items-center">
                         <p id="table" class="fw-bold mb-0"></p>
@@ -55,7 +55,7 @@
     }
 
     function displayResults(data) { 
-        document.getElementById('test_result').innerHTML = `${test_time}<br>測驗結果`;
+        document.getElementById('test_result').innerHTML = `${test_time} 測驗結果`;
         const tableElement = document.getElementById('table');
         
         // 檢查資料格式，防止因為格式錯誤而發生錯誤
