@@ -119,13 +119,13 @@ def register():
     role = data.get('role')
 
     if not username or not password or not role:
-        return jsonify({'error': 'Missing required fields'}), 400
+        return jsonify({'error': '請完整填寫註冊資料'}), 400
 
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     try:
         query_db('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', [username, hashed_password, role])
     except sqlite3.IntegrityError:
-        return jsonify({'error': 'Username already exists'}), 400
+        return jsonify({'error': '帳號名稱已有人使用'}), 400
 
     return jsonify({'message': 'User registered successfully'}), 201
 
