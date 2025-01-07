@@ -512,6 +512,27 @@ def get_career_type_job_detail(type, job_title):
         return jsonify(job_detail), 200
     except FileNotFoundError:
         return jsonify({'error': '類型不存在'}), 404
+@app.route('/favorites/add', methods=['POST'])
+def add_favorite():
+    user_id = request.json.get('user_id')
+    article_id = request.json.get('article_id')
+
+    if not user_id or not article_id:
+        return jsonify({'error': '缺少必要的參數'}), 400
+
+    query_db('INSERT INTO favorites (user_id, article_id) VALUES (?, ?)', [user_id, article_id])
+    return jsonify({'message': '文章已收藏'}), 201
+
+@app.route('/favorites/delete', methods=['DELETE'])
+def delete_favorite():
+    user_id = request.json.get('user_id')
+    article_id = request.json.get('article_id')
+
+    if not user_id or not article_id:
+        return jsonify({'error': '缺少必要的參數'}), 400
+
+    query_db('DELETE FROM favorites WHERE user_id = ? AND article_id = ?', [user_id, article_id])
+    return jsonify({'message': '文章已取消收藏'}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Reply author{% endblock %}
+{% block title %}回覆留言{% endblock %}
 
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
@@ -8,13 +8,13 @@
         <div class="card border-info rounded-4 h-100">
 
             <div class="card-header d-flex justify-content-between p-3 px-4">
-                <h3 class="fw-bold mb-0">回覆</h3>
+                <h3 class="fw-bold mb-0">回覆留言</h3>
                 <p id="courseCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
             </div>
 
             <div class="card-body col-12 text-info p-4 d-flex justify-content-center align-items-center">
                 <div class="col-12 p-0 d-flex flex-column justify-content-start align-items-start overflow-auto" style="height: 41vh; gap: 0.5rem;">
-
+                    <textarea id="replyContent" class="form-control" rows="5" placeholder="輸入您的回覆..."></textarea>
                 </div>    
             </div>
 
@@ -31,6 +31,40 @@
 
 {% block content1 %}
 <script>
-   
+    function sendOut() {
+        const commentId = localStorage.getItem('comment_id');
+        const userId = localStorage.getItem('user_id');
+        const content = document.getElementById('replyContent').value;
+
+        if (!content) {
+            alert('回覆內容不可空白');
+            return;
+        }
+
+        fetch('/re_comments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                comment_id: commentId,
+                user_id: userId,
+                content: content
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+                window.location.href = '/article_content';
+            } else {
+                alert(data.error || '無法新增回覆');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('無法新增回覆');
+        });
+    }
 </script>
 {% endblock %}

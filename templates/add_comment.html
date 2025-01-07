@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Add comment{% endblock %}
+{% block title %}新增留言{% endblock %}
 
 {% block content %}
 <div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
@@ -14,7 +14,7 @@
 
             <div class="card-body col-12 text-info p-4 d-flex justify-content-center align-items-center">
                 <div class="col-12 p-0 d-flex flex-column justify-content-start align-items-start overflow-auto" style="height: 41vh; gap: 0.5rem;">
-                    
+                    <textarea id="commentContent" class="form-control" rows="5" placeholder="輸入您的留言..."></textarea>
                 </div>    
             </div>
 
@@ -31,6 +31,40 @@
 
 {% block content1 %}
 <script>
+    function sendOut() {
+        const articleId = localStorage.getItem('article_id');
+        const userId = localStorage.getItem('user_id');
+        const content = document.getElementById('commentContent').value;
 
+        if (!content) {
+            alert('留言內容不可空白');
+            return;
+        }
+
+        fetch('/comments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                article_id: articleId,
+                user_id: userId,
+                content: content
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                alert(data.message);
+                window.location.href = '/article_content';
+            } else {
+                alert(data.error || '無法新增留言');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('無法新增留言');
+        });
+    }
 </script>
 {% endblock %}
