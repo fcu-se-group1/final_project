@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Homepage{% endblock %}
+
+{% block content %}
+    <div class="container d-flex flex-column justify-content-center align-items-center h-100">
+        <div class="row w-100 justify-content-center mb-3">
+            <div class="slogan text-center">
+                <h1 class="text-white">展望笑嘻嘻的未來</h1>
+                <h2 class="text-white">快來探索你的職涯，走出屬於自己的路</h2>
+            </div>
+        </div>
+        
+        <div class="row col-3 d-flex justify-content-center align-items-center">
+            <a href="{{ url_for('chooseFunction') }}" class="btn btn-custom">開始</a>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content1 %}
+<script>
+    function adjustHeading() {
+        if (window.innerWidth < 576) { // Bootstrap's xs breakpoint
+            document.querySelector('.slogan').outerHTML = `<div class="slogan text-center">
+                <h3 class="text-white">展望笑嘻嘻的未來</h3>
+                <h5 class="text-white">快來探索你的職涯，走出屬於自己的路</h5>
+            </div>`;
+        } else {
+            document.querySelector('.slogan').outerHTML = `<div class="slogan text-center">
+                <h1 class="text-white">展望笑嘻嘻的未來</h1>
+                <h2 class="text-white">快來探索你的職涯，走出屬於自己的路</h2>
+            </div>`;
+        }
+    }
+
+    window.addEventListener('resize', adjustHeading);
+    window.addEventListener('load', adjustHeading);
+    
+</script>
+{% endblock %}

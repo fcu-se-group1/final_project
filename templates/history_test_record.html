@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}History test record{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
+    <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+        <div class="card border-dark rounded-4 h-100">
+            <div class="card-header d-flex justify-content-between p-3 px-4">
+                <h3 class="fw-bold mb-0">歷史測驗紀錄</h3>
+                <p id="courseCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
+            </div>
+            <div class="card-body col-12 text-dark p-4 d-flex justify-content-center align-items-center" id="cardBody">
+                <div class="col vh-40 p-0 d-flex flex-column justify-content-start align-items-center overflow-auto" id="overflowContainer">
+                    <div id="history_test_record"></div>
+                </div>
+                <p id="noRecordsMessage" class="text-secondary my-3 d-none">您尚未做過職涯測驗</p>
+            </div>
+            <div class="card-footer px-4">
+                <div class="d-flex justify-content-end" style="gap: 2rem;">
+                    <a href="{{ url_for('seeker_personal_homepage') }}" class="btn btn-indigo">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content1 %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchHistoryTestRecords();
+    });
+
+    async function fetchHistoryTestRecords() {
+        try {
+            
+            const user_id = localStorage.getItem('user_id');
+            const response = await fetch(`/history_tests?user_id=${user_id}`);  // 使用 GET 請求並附加 user_id 作為查詢參數
+            const data = await response.json();
+            console.log(data);
+            displayHistoryTestRecords(data);
+        } catch (error) {
+            console.error('Error fetching history test records:', error);
+        }
+    }
+
+    function displayHistoryTestRecords(data) {
+        const historyTestRecordContainer = document.getElementById('history_test_record');
+        const overflowContainer = document.getElementById('overflowContainer');
+        const noRecordsMessage = document.getElementById('noRecordsMessage');
+
+        if (data.length > 0) {
+            let recordsContent = '';
+            data.forEach(record => {
+                recordsContent += `
+                    <div class="record-item">
+                        <p><a class="fs-4 text-decoration-none" href="{{ url_for('history_test_record_check') }}"
+                            data-test-id="{${record.test_id}}"
+                            data-time="{${record.created_at}}" 
+                            onclick="saveTestId(event)">
+                            ${record.created_at}
+                        </a></p>
+                    </div>
+                `;
+            });
+            historyTestRecordContainer.innerHTML = recordsContent;
+        } else {
+            noRecordsMessage.classList.remove('d-none');
+            overflowContainer.classList.add('d-none');
+        }
+    }
+
+    function saveTestId(event) {
+        const testId = event.target.getAttribute('data-test-id');
+        localStorage.setItem('test_id', testId);
+        const test_time = event.target.getAttribute('data-time');
+        localStorage.setItem('test_time', test_time);
+        window.location.href = event.target.href;
+    }
+</script>
+{% endblock %}

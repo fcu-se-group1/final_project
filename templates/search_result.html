@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Search result{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
+    <div class="col-12 col-lg-10 col-xl-8">
+        <div class="card border-purple rounded-4 h-100">
+            <div class="card-header p-3 px-4"><h3 class="fw-bold mb-0">搜尋結果</h3></div>
+            
+            <div class="card-body text-purple d-flex justify-content-center align-items-center p-2">
+                <div class="col vh-50 overflow-auto" id="overflowContainer">
+                    <table class="table table-bordered">
+                        <thead id="tableHead">
+                            <!-- Thead will be dynamically inserted here by JavaScript if data is found -->
+                        </thead>
+                        <tbody id="courseTableBody">
+                            <!-- Rows will be dynamically inserted here by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+                <p id="noResultsMessage" class="d-none text-center text-purple mb-0"></p>
+            </div>
+
+            <div class="card-footer px-4">
+                <div class="d-flex justify-content-end" style="gap: 2rem;">
+                    <a href="{{ url_for('search_article') }}" class="btn btn-indigo">返回</a>
+                    <a href="{{ url_for('chooseFunction') }}" id="checkButton" class="btn btn-indigo" onclick="clearSelectedFunction()">確認</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content1 %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        displayResults();
+    });
+
+    async function displayResults() {
+        const resultsContainer = document.getElementById('courseTableBody');
+        const tableHead = document.getElementById('tableHead');
+        const noResultsMessage = document.getElementById('noResultsMessage');
+        const data = JSON.parse(localStorage.getItem('searchResults'));
+        const overflowContainer = document.getElementById('overflowContainer');
+
+        if (data.message) {
+            noResultsMessage.textContent = data.message;
+            noResultsMessage.classList.remove('d-none');
+        } else {
+            if (data.length > 0) {
+                tableHead.innerHTML = `
+                    <tr class="text-center">
+                        <th class="col-3">類型</th>
+                        <th class="col">文章標題</th>
+                        <th class="col-3">作者</th>
+                    </tr>
+                `;
+                let resultsContent = '';
+                data.forEach(article => {
+                    resultsContent += `
+                        <tr class="text-center">
+                            <td class="fw-bold">${article.career_type}</td>
+                            <td><a class="text-decoration-none fw-bold" href="/article_content?article_id=${article.article_id}">${article.title}</a></td>
+                            <td class="fw-bold">${article.username}</td>
+                        </tr>
+                    `;
+                });
+                resultsContainer.innerHTML = resultsContent;
+            } else {
+                noResultsMessage.textContent = '查無符合條件的文章';
+                noResultsMessage.classList.remove('d-none');
+                overflowContainer.classList.add('d-none');   
+            }
+        }
+    }
+
+    // function setArticleIdAndNavigate(articleId) {
+    //     localStorage.setItem('article_id', articleId);
+    //     window.location.href = '/article_content';
+    // }
+
+    function clearSelectedFunction() {
+        localStorage.removeItem('selectedFunction');
+    }
+</script>
+{% endblock %}

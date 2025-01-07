@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Article{% endblock %}
+
+{% block content %}
+<style>
+    textarea {
+        resize: none; /* 移除調整大小功能 */
+        overflow: hidden; /* 移除滾動欄 */
+    }
+</style>
+<div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
+    <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+        <div class="card border-purple rounded-4 h-100">
+            <div class="card-header d-flex justify-content-between p-3 px-4">
+                <h3 class="fw-bold mb-0">編輯文章</h3>
+                <p id="articleCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
+            </div>
+            <div class="col-12 vh-45 card-body text-purple d-flex flex-column align-items-center p-4 overflow-auto"  id="overflowContainer">
+                <div class="col-lg-8 d-flex flex-column justify-content-center align-items-center" style="gap: 1rem;">
+                    <div class="col-12 d-flex align-items-center">
+                        <h5 class="card-title fw-bold mb-0">標題&nbsp;:&nbsp;</h5>
+                        <input type="text" class="form-control col" placeholder="請輸入標題..." id="articleTitle">
+                    </div>
+                    <div class="col-12 d-flex align-items-center">
+                        <h5 class="card-title fw-bold mb-0">職業類型&nbsp;:&nbsp;</h5>
+                        <div class="d-flex flex-column justify-content-center align-items-start">
+                            <div class="col-12 d-flex justify-content-center">
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="R">
+                                    <label class="form-check-label" for="realistic">R實用型&nbsp;</label>
+                                </div>
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="I">
+                                    <label class="form-check-label" for="investigative">I研究型&nbsp;</label>
+                                </div>
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="A">
+                                    <label class="form-check-label" for="artistic">A藝術型&nbsp;</label>
+                                </div>
+                            </div>
+                            <div class="d-flex justify-content-center">
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="S">
+                                    <label class="form-check-label" for="social">S社會型&nbsp;</label>
+                                </div>
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="E">
+                                    <label class="form-check-label" for="enterprising">E企業型&nbsp;</label>
+                                </div>
+                                <div class="form-check mb-0">
+                                    <input class="form-check-input" type="radio" name="flexRadioDefault" id="C">
+                                    <label class="form-check-label" for="conventional">C事務型&nbsp;</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 d-flex align-items-center">
+                        <h5 class="card-title fw-bold mb-0">內文&nbsp;:&nbsp;</h5>
+                        <textarea class="form-control col" placeholder="請輸入相關經驗..." id="articleContent" oninput="autoResize(this)" rows="1"></textarea>
+                    </div>
+                    <div class="col-12 d-flex align-items-center">
+                        <h5 class="card-title fw-bold mb-0">上傳圖片/影片&nbsp;:&nbsp;</h5>
+                        <button type="button" class="btn btn-indigo ms-2" onclick="uploadFile()">上傳</button>
+                    </div>
+                    <div class="col-12" id="fileList"></div>
+                </div>
+            </div>
+            <div class="card-footer px-4">
+                <div class="d-flex justify-content-end" style="gap: 2rem;">
+                    <a href="{{ url_for('chooseFunction') }}" class="btn btn-indigo">返回</a>
+                    <a href="#" id="confirmButton" class="btn btn-indigo" onclick="updateArticle()">更新</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content1 %}
+<script>
+    let uploadedFiles = [];
+    let existingFiles = [];
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const articleId = new URLSearchParams(window.location.search).get('article_id');
+        if (articleId) {
+            fetchArticleDetails(articleId);
+        } else {
+            alert('無法獲取文章ID');
+        }
+    });
+
+    async function fetchArticleDetails(articleId) {
+        try {
+            const response = await fetch(`/article_details/${articleId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                document.getElementById('articleTitle').value = data.title;
+                document.getElementById('articleContent').value = data.content;
+                document.getElementById(data.career_type).checked = true;
+                autoResize(document.getElementById('articleContent'));
+
+                const fileList = document.getElementById('fileList');
+                data.media.forEach(media => {
+                    existingFiles.push(media.filename);
+                    const fileRow = document.createElement('div');
+                    fileRow.className = 'd-flex align-items-center justify-content-between mt-2';
+                    fileRow.innerHTML = `
+                        <span>${media.filename}</span>
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeExistingFile(this, '${media.filename}')">刪除</button>
+                    `;
+                    fileList.appendChild(fileRow);
+                });
+            } else {
+                alert(data.error || '無法獲取文章詳情');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('無法獲取文章詳情');
+        }
+    }
+
+    function uploadFile() {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = '.jpg, .jpeg, .mp4'; // 只允許 JPG 和 MP4 文件
+        fileInput.style.display = 'none';
+        fileInput.onchange = function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                uploadedFiles.push(file);
+                const fileList = document.getElementById('fileList');
+                const fileRow = document.createElement('div');
+                fileRow.className = 'd-flex align-items-center justify-content-between mt-2';
+                fileRow.innerHTML = `
+                    <span>${file.name}</span>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="removeFile(this, '${file.name}')">刪除</button>
+                `;
+                fileList.appendChild(fileRow);
+            }
+        };
+        document.body.appendChild(fileInput);
+        fileInput.click();
+        document.body.removeChild(fileInput);
+    }
+
+    function removeFile(button, fileName) {
+        const fileRow = button.parentElement;
+        fileRow.remove();
+        uploadedFiles = uploadedFiles.filter(file => file.name !== fileName);
+    }
+
+    function removeExistingFile(button, fileName) {
+        const fileRow = button.parentElement;
+        fileRow.remove();
+        existingFiles = existingFiles.filter(file => file !== fileName);
+    }
+
+    async function updateArticle() {
+        const articleId = new URLSearchParams(window.location.search).get('article_id');
+        const title = document.getElementById('articleTitle').value;
+        const careerTypeElement = document.querySelector('input[name="flexRadioDefault"]:checked');
+        const content = document.getElementById('articleContent').value;
+        if (!title ) {
+            Swal.fire({
+                title: '錯誤',
+                text: '請填寫標題',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+            return;
+        }
+        if(!careerTypeElement){
+            Swal.fire({
+                title: '錯誤',
+                text: '請填寫職業類型',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+            return
+        }
+        if(!content){
+            Swal.fire({
+                title: '錯誤',
+                text: '請填寫內容',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+            return
+        }
+
+        const careerType = careerTypeElement.id;
+
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('career_type', careerType);
+        formData.append('content', content);
+
+        // 將所有現有文件和新上傳的文件都添加到 formData 中
+        formData.append('existing_files', JSON.stringify(existingFiles));
+        for (let i = 0; i < uploadedFiles.length; i++) {
+            formData.append('media', uploadedFiles[i]);
+        }
+
+        try {
+            const response = await fetch(`/user_articles/edit/${articleId}`, {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+            if (response.ok) {
+                Swal.fire({
+                    title: '成功',
+                    text: '文章更新成功',
+                    icon: 'success',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                }).then(function() {
+                    window.location.href = '/chooseFunction';
+                });
+            } else {
+                Swal.fire({
+                    title: '錯誤',
+                    text: '文章更新失敗',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            Swal.fire({
+                title: '錯誤',
+                text: '文章更新失敗',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+        }
+    }
+
+    function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    }
+</script>
+{% endblock %}

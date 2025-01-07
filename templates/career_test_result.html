@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Career test result{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
+    <div class="col-lg-4">
+        <div class="card border-purple rounded-4 h-100">
+            <div class="card-header p-3 px-4"><h3 class="fw-bold mb-0">測驗結果</h3></div>
+            
+            <div class="card-body text-secondary d-flex justify-content-center align-items-start p-2 overflow-auto vh-50">
+                <div class="d-flex flex-column justify-content-center align-items-start my-3" style="gap: 0.5rem;">
+                    <div class="col-12 d-flex justify-content-center align-items-center">
+                        <p id="table" class="fw-bold mb-0"></p>
+                    </div>
+                    <div class="col-12 d-flex justify-content-center align-items-center">
+                        <p id="annotation" class="fw-bold mb-0">(* 標示為前三個比較高分的類型)</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer px-4">
+                <div class="d-flex justify-content-center" style="gap: 2rem;">
+                    <a href="{{ url_for('chooseFunction') }}" id="checkButton" class="btn btn-indigo" onclick="clearSelectedFunction()">確認</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content1 %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchTestResults();
+    });
+
+    async function fetchTestResults() {
+        try {
+            const result = localStorage.getItem('result');
+            console.log(result);
+            const resultData = JSON.parse(result);
+            displayResults(resultData);
+        } catch (error) {
+            console.error('Error fetching test results:', error);
+        }
+    }
+
+    function displayResults(data) { 
+        const tableElement = document.getElementById('table');
+        
+        // 檢查資料格式，防止因為格式錯誤而發生錯誤
+        if (!data || typeof data !== 'object') {
+            console.error('Invalid data format:', data);
+            return;
+        }
+
+        // 將資料轉換為一個陣列，並根據分數排序
+        const sortedData = Object.entries(data)
+            .map(([type, score]) => ({ type, score })) // 轉換為物件陣列
+            .sort((a, b) => b.score - a.score); // 根據分數從大到小排序
+
+        let tableContent = '<table class="table table-bordered"><thead><tr><th style="text-align: center;">類型</th><th style="text-align: center;">分數</th><th style="text-align: center;">備註</th></tr></thead><tbody>';
+        
+        // 選擇前三個分數最高的類型
+        sortedData.forEach((item, index) => {
+            const annotation = index < 3 ? '*' : ''; // 前三名顯示 *，其餘顯示空白
+            tableContent += `<tr><td style="text-align: center;">${item.type}</td><td style="text-align: center;">${item.score}</td><td style="text-align: center;">${annotation}</td></tr>`;
+        });
+
+        tableContent += '</tbody></table>';
+        tableElement.innerHTML = tableContent;
+    }
+
+
+
+    function clearSelectedFunction() {
+        localStorage.removeItem('selectedFunction');
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Type introduction choose{% endblock %}
+
+{% block content %}
+    <div class="container d-flex flex-column justify-content-center align-items-center" style="height: 80%;">
+        <div class="d-flex flex-column justify-content-center align-items-center gap-3">
+    
+            <div class="text-white" >
+                <h1 class=" fw-bold mb-0">職業類型介紹</h1>
+            </div>
+
+            <div class="col-12 d-flex flex-column justify-content-start justify-content-md-center align-items-center overflow-auto vh-45" >
+    
+                <div class="col-9 row row-cols-1 row-cols-md-3 d-flex justify-content-center mb-md-3">
+                    
+                    <div class="col-12">
+                        <a href="{{ url_for('type_intro') }}" class="text-decoration-none" onclick="chooseType('R')">
+                            <div class="card border-purple h-100">
+                                <div class="card-header"><h4 class="fw-bold mb-0">R 實用型</h4></div>
+                                <div class="card-body text-purple">
+                                    <p class="card-text mb-0">點此觀看 R 實用型的介紹</p> <!-- ai暫時生成 -->
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <div class="col-12 ">
+                        <a href="{{ url_for('type_intro') }}" class="text-decoration-none" onclick="chooseType('I')">
+                            <div class="card border-purple h-100">
+                                <div class="card-header"><h4 class="fw-bold mb-0">I 研究型</h4></div>
+                                <div class="card-body text-purple">
+                                    <p class="card-text mb-0">點此觀看 I 研究型的介紹</p> <!-- ai暫時生成 -->
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <div class="col-12">
+                        <a href="{{ url_for('type_intro') }}" class="text-decoration-none" onclick="chooseType('A')">
+                            <div class="card border-purple h-100">
+                                <div class="card-header"><h4 class="fw-bold mb-0">A 藝術型</h4></div>
+                                <div class="card-body text-purple">
+                                    <p class="card-text mb-0">點此觀看 A 藝術型的介紹</p> <!-- ai暫時生成 -->
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+    
+                </div>
+    
+                <div class="col-9 row row-cols-1 row-cols-md-3  d-flex justify-content-center">
+    
+                    <div class="col-12">
+                        <a href="{{ url_for('type_intro') }}" class="text-decoration-none" onclick="chooseType('S')">
+                            <div class="card border-purple h-100">
+                                <div class="card-header"><h4 class="fw-bold mb-0">S 社會型</h4></div>
+                                <div class="card-body text-purple">
+                                    <p class="card-text mb-0">點此觀看 S 社會型的介紹</p> <!-- ai暫時生成 -->
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+    
+                    <div class="col-12">
+                        <a href="{{ url_for('type_intro') }}" class="text-decoration-none" onclick="chooseType('E')">
+                            <div class="card border-purple h-100">
+                                <div class="card-header"><h4 class="fw-bold mb-0">E 企業型</h4></div>
+                                <div class="card-body text-purple">
+                                    <p class="card-text mb-0">點此觀看 E 企業型的介紹</p> <!-- ai暫時生成 -->                
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="col-12">
+                        <a href="{{ url_for('type_intro') }}" class="text-decoration-none" onclick="chooseType('C')">
+                            <div class="card border-purple h-100">
+                                <div class="card-header"><h4 class="fw-bold mb-0">C 事業型</h4></div>
+                                <div class="card-body text-purple">
+                                    <p class="card-text mb-0">點此觀看 C 事業型的介紹</p> <!-- ai暫時生成 -->                
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+    
+                </div>
+            </div>
+
+            <div class="col-12 card-footer">
+                <div class="d-flex justify-content-center align-items-center">
+                    <a href="{{ url_for('chooseFunction') }}" class="btn btn-indigo">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block content1 %}
+    <script>
+        function chooseType(Type){
+            localStorage.setItem('selectedType', Type);
+        }
+
+        function adjustHeading() {
+            const headers = document.querySelectorAll('.card-header');
+            const titles = document.querySelectorAll('.card-title');
+
+            headers.forEach(header => {
+                if (!header.dataset.originalContent) {
+                    header.dataset.originalContent = header.textContent;
+                }
+                if (window.innerWidth >= 1400) {
+                    header.innerHTML = `<h4 class="fw-bold mb-0">${header.dataset.originalContent}</h4>`;
+                } else if (window.innerWidth >= 1200) {
+                    header.innerHTML = `<h5 class="fw-bold mb-0">${header.dataset.originalContent}</h5>`;
+                } else {
+                    header.innerHTML = `<h6 class="fw-bold mb-0">${header.dataset.originalContent}</h6>`;
+                }
+            });
+
+            titles.forEach(title => {
+                if (!title.dataset.originalContent) {
+                    title.dataset.originalContent = title.textContent;
+                }
+                if (window.innerWidth >= 1400) {
+                    title.innerHTML = `<h5 class="card-title fw-bold">${title.dataset.originalContent}</h5>`;
+                    title.style.display = '';
+                } else if (window.innerWidth >= 1200) {
+                    title.innerHTML = `<h6 class="card-title fw-bold">${title.dataset.originalContent}</h6>`;
+                    title.style.display = '';
+                } else {
+                    title.style.display = `none`;
+                }
+            });
+        }
+
+        window.addEventListener('resize', adjustHeading);
+        window.addEventListener('load', adjustHeading);
+
+    </script>
+{% endblock %}

@@ -1,21 +1,115 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask import Flask, request, jsonify, render_template, redirect, url_for,send_from_directory
 import datetime
 import sqlite3
 import json
 import os
 from flask_bcrypt import Bcrypt
+import json
+import random
 
-app = Flask(__name__, static_folder='.', template_folder='.')
+app = Flask(__name__, static_folder='static', template_folder='templates')
 bcrypt = Bcrypt(app)
 
 def query_db(query, args=(), one=False):
-    conn = sqlite3.connect('db\\db.db')
+    conn = sqlite3.connect('db\\database.db')
     cur = conn.cursor()
     cur.execute(query, args)
     rv = cur.fetchall()
     conn.commit()
     conn.close()
     return (rv[0] if rv else None) if one else rv
+
+@app.route('/')
+def homepage():
+    return render_template('homepage.html')
+
+@app.route('/add_comment')
+def add_comment():
+    return render_template('add_comment.html')
+
+@app.route('/article_content')
+def article_content():
+    return render_template('article_content.html')
+
+@app.route('/article_record')
+def article_record():
+    return render_template('article_record.html')
+
+@app.route('/career_test_result')
+def career_test_result():
+    return render_template('career_test_result.html')
+
+@app.route('/career_test_start')
+def career_test_start():
+    return render_template('career_test_start.html')
+
+@app.route('/career_test')
+def career_test():
+    return render_template('career_test.html')
+
+@app.route('/chooseFunction')
+def chooseFunction():
+    return render_template('chooseFunction.html')
+
+@app.route('/edit_article')
+def edit_article():
+    return render_template('edit_article.html')
+
+@app.route('/favorite_article')
+def favorite_article():
+    return render_template('favorite_article.html')
+
+@app.route('/history_test_record_check')
+def history_test_record_check():
+    return render_template('history_test_record_check.html')
+
+@app.route('/history_test_record')
+def history_test_record():
+    return render_template('history_test_record.html')
+
+@app.route('/job_intro')
+def job_intro():
+    return render_template('job_intro.html')
+
+@app.route('/log_in')
+def log_in():
+    return render_template('log_in.html')
+
+@app.route('/post_article')
+def post_article():
+    return render_template('post_article.html')
+
+@app.route('/reply_author')
+def reply_author():
+    return render_template('reply_author.html')
+
+@app.route('/search_article')
+def search_article():
+    return render_template('search_article.html')
+
+@app.route('/search_result')
+def search_result():
+    return render_template('search_result.html')
+
+@app.route('/seeker_personal_homepage')
+def seeker_personal_homepage():
+    return render_template('seeker_personal_homepage.html')
+
+@app.route('/sign_up')
+def sign_up():
+    return render_template('sign_up.html')
+
+@app.route('/social_personal_homepage')
+def social_personal_homepage():
+    return render_template('social_personal_homepage.html')
+
+@app.route('/type_intro_choose')
+def type_intro_choose():
+    return render_template('type_intro_choose.html')
+
+@app.route('/type_intro')
+def type_intro():
+    return render_template('type_intro.html')
 
 @app.route('/register', methods=['POST'])
 def register():
@@ -25,28 +119,28 @@ def register():
     role = data.get('role')
 
     if not username or not password or not role:
-        return jsonify({'error': 'Missing required fields'}), 400
+        return jsonify({'error': '請完整填寫註冊資料'}), 400
 
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
     try:
         query_db('INSERT INTO users (username, password, role) VALUES (?, ?, ?)', [username, hashed_password, role])
     except sqlite3.IntegrityError:
-        return jsonify({'error': 'Username already exists'}), 400
+        return jsonify({'error': '帳號名稱已有人使用'}), 400
 
     return jsonify({'message': 'User registered successfully'}), 201
 
-@app.route('/login', methods=['POST'])
+@app.route('/login_check', methods=['POST'])
 def login():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
 
     if not username or not password:
-        return jsonify({'error': 'Missing required fields'}), 400
+        return jsonify({'error': '帳號或密碼不可空白'}), 400
 
     user = query_db('SELECT user_id, password,role,username FROM users WHERE username = ?', [username], one=True)
     if user is None or not bcrypt.check_password_hash(user[1], password):
-        return jsonify({'error': 'Invalid username or password'}), 400
+        return jsonify({'error': '帳號或密碼錯誤'}), 400
 
     return jsonify({'message': 'Login successful', 'user_id': user[0],"user_role":user[2],'user_name':user[3]}), 200
 
@@ -56,10 +150,15 @@ def show_career_test(filename):
     if not os.path.exists(filepath):
         return jsonify({'error': 'File not found'}), 404
 
-    with open(filepath, 'r',encoding="utf-8") as f:
+    with open(filepath, 'r', encoding="utf-8") as f:
         data = json.load(f)
 
-    return jsonify(data), 200
+    questions = data.get('選擇題', [])
+    if len(questions) < 10:
+        return jsonify({'error': 'Not enough questions in the file'}), 400
+
+    selected_questions = random.sample(questions, 10)
+    return jsonify({'選擇題': selected_questions}), 200
 
 @app.route('/career_test', methods=['POST'])
 def create_career_test():
@@ -132,7 +231,6 @@ def create_comment():
     article_id = data.get('article_id')
     user_id = data.get('user_id')
     content = data.get('content')
-
     if not article_id or not user_id or not content:
         return jsonify({'error': 'Missing required fields'}), 400
 
@@ -178,8 +276,8 @@ def search_articles():
     args = []
 
     if career_type:
-        query += ' AND articles.career_type LIKE ?'
-        args.append(f'%{career_type}%')
+        query += ' AND articles.career_type = ?'
+        args.append(career_type)
 
     if keyword:
         query += ' AND (articles.title LIKE ? OR articles.content LIKE ?)'
@@ -191,6 +289,8 @@ def search_articles():
         args.append(f'%{username}%')
 
     articles = query_db(query, args)
+    print(query ,args)
+    print(articles)
     if not articles:
         return jsonify({'message': '查無符合條件的文章'}), 200
 
@@ -208,9 +308,8 @@ def get_article_details(article_id):
         SELECT articles.article_id, articles.author_id, articles.title, articles.career_type, articles.media, articles.content, articles.created_at, users.username
         FROM articles
         JOIN users ON articles.author_id = users.user_id
-        WHERE articles.article_id = ? AND is_deleted = 0
+        WHERE articles.article_id = ? AND is_deliete = 0
     ''', [article_id], one=True)
-
     if not article:
         return jsonify({'error': '文章不存在'}), 404
 
@@ -230,6 +329,17 @@ def get_article_details(article_id):
             JOIN users ON re_comments.user_id = users.user_id
             WHERE re_comments.comment_id = ?
         ''', [comment_id])
+
+        for i, re_comment in enumerate(re_comment_list):
+            re_comment = list(re_comment)
+
+            re_comment[3] = datetime.datetime.strptime(re_comment[3], "%Y-%m-%d %H:%M:%S")
+            re_comment[3] = re_comment[3].replace(tzinfo=datetime.timezone.utc)
+            re_comment[3] = re_comment[3].astimezone(datetime.timezone(datetime.timedelta(hours=8)))
+            re_comment[3] = re_comment[3].strftime("%Y-%m-%d %H:%M:%S")
+            # 更新列表中的該元素
+            re_comment_list[i] = tuple(re_comment)
+
         re_comments = []
         for re_comment in re_comment_list:
             re_comments.append({
@@ -241,13 +351,34 @@ def get_article_details(article_id):
             })
         return re_comments
 
+    # 打開媒體檔案
+    media_contents = []
+    if(article[4] != None):
+        media_files = json.loads(article[4])
+        for media_file in media_files:
+            with open(media_file, 'rb') as f:
+                media_contents.append({
+                    'filename': os.path.basename(media_file),
+                    'content': f.read().decode('latin1')  # 使用latin1編碼以避免二進制數據損壞
+                })
+
+    for i, comment in enumerate(comments):
+        comment = list(comment)
+
+        comment[3] = datetime.datetime.strptime(comment[3], "%Y-%m-%d %H:%M:%S")
+        comment[3] = comment[3].replace(tzinfo=datetime.timezone.utc)
+        comment[3] = comment[3].astimezone(datetime.timezone(datetime.timedelta(hours=8)))
+        comment[3] = comment[3].strftime("%Y-%m-%d %H:%M:%S")
+        # 更新列表中的該元素
+        comments[i] = tuple(comment)
+
     # 構建返回結果
     result = {
         'article_id': article[0],
         'author_id': article[1],
         'title': article[2],
         'career_type': article[3],
-        'media': article[4],
+        'media': media_contents,
         'content': article[5],
         'created_at': article[6],
         'username': article[7],
@@ -276,28 +407,41 @@ def get_career(career_id):
 
     return jsonify({'career_id': career[0], 'type': career[1], 'description': career[2]}), 200
 
-@app.route('/history_tests/<int:user_id>', methods=['GET'])
-def get_history_tests(user_id):
+@app.route('/history_tests', methods=['GET'])
+def history_tests():
+    user_id = request.args.get('user_id')
     tests = query_db('SELECT test_id, created_at FROM career_tests WHERE user_id = ?', [user_id])
     if not tests:
         return jsonify({'message': '您尚未做過職涯測驗'}), 200
+    for i, test in enumerate(tests):
+        # 將 test 轉換為 list，這樣可以修改它的內容
+        test = list(test)
 
+        # 修改 test[1] 也就是 created_at
+        test[1] = datetime.datetime.strptime(test[1], "%Y-%m-%d %H:%M:%S")
+        test[1] = test[1].replace(tzinfo=datetime.timezone.utc)
+        test[1] = test[1].astimezone(datetime.timezone(datetime.timedelta(hours=8)))
+        test[1] = test[1].strftime("%Y-%m-%d %H:%M:%S")
+        # 更新 tests 列表中的該元素
+        tests[i] = tuple(test)
     return jsonify([{'test_id': test[0], 'created_at': test[1]} for test in tests]), 200
 
-@app.route('/history_tests/detail/<int:test_id>', methods=['GET'])
-def get_test_detail(test_id):
+@app.route('/history_test_detail', methods=['GET'])
+def history_test_detail():
+    test_id = request.args.get('test_id')
     test = query_db('SELECT result FROM career_tests WHERE test_id = ?', [test_id], one=True)
     if not test:
         return jsonify({'message': '該測驗結果不存在'}), 404
 
     with open(test[0], 'r') as f:
         result = json.load(f)
+        print(result)
 
     return jsonify(result), 200
 
 @app.route('/user_articles/<int:user_id>', methods=['GET'])
 def get_user_articles(user_id):
-    articles = query_db('SELECT article_id, title, created_at FROM articles WHERE author_id = ? AND is_deleted = 0', [user_id])
+    articles = query_db('SELECT article_id, title, created_at FROM articles WHERE author_id = ? AND is_deliete = 0', [user_id])
     if not articles:
         return jsonify({'message': '您尚未發表任何文章'}), 200
 
@@ -312,7 +456,7 @@ def get_user_articles(user_id):
 #     return jsonify({'title': article[0], 'career_type': article[1], 'media': article[2], 'content': article[3], 'created_at': article[4]}), 200
 
 @app.route('/user_articles/edit/<int:article_id>', methods=['POST'])
-def edit_article(article_id):
+def edit_article1(article_id):
     data = request.form
     title = data.get('title')
     career_type = data.get('career_type')
@@ -324,21 +468,29 @@ def edit_article(article_id):
     media_files = request.files.getlist('media')
     media_filenames = []
 
+    # 處理新上傳的文件
     for media_file in media_files:
         if media_file.filename == '':
             continue
-        media_file.save(f'media/{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}_{media_file.filename}')
-        media_filenames.append(media_file.filename)
+        media_filename = f'media/{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}_{media_file.filename}'
+        os.makedirs(os.path.dirname(media_filename), exist_ok=True)
+        media_file.save(media_filename)
+        media_filenames.append(media_filename)
+
+    # 處理已存在的文件
+    existing_files = json.loads(data.get('existing_files', '[]'))
+    for existing_file in existing_files:
+        media_filenames.append(f'media/{existing_file}')
 
     media_filenames_json = json.dumps(media_filenames)
 
     query_db('UPDATE articles SET title = ?, career_type = ?, media = ?, content = ? WHERE article_id = ?', 
-             [title, career_type,media_filenames_json, content, article_id])
-    return jsonify({'message': '文章編輯成功'}), 200
+             [title, career_type, media_filenames_json, content, article_id])
+    return jsonify({'message': 'Article updated successfully'}), 200
 
 @app.route('/user_articles/delete/<int:article_id>', methods=['DELETE'])
 def delete_article(article_id):
-    query_db('UPDATE articles SET is_deleted = 1 WHERE article_id = ?', [article_id])  # 修改這一行
+    query_db('UPDATE articles SET is_deliete = 1 WHERE article_id = ?', [article_id])  # 修改這一行
     return jsonify({'message': '該文章已被刪除'}), 200
 
 @app.route('/favorites/<int:user_id>', methods=['GET'])
@@ -347,15 +499,15 @@ def get_favorites(user_id):
     if not favorites:
         return jsonify({'message': '您尚未收藏任何文章'}), 200
 
-    return jsonify([{'article_id': favorite[0], 'title': favorite[1], 'created_at': favorite[2]} for favorite in favorites]), 200
+    return jsonify([{'article_id': favorite[0], 'title': favorite[1], } for favorite in favorites]), 200
 
-# @app.route('/favorites/detail/<int:article_id>', methods=['GET'])
-# def get_favorite_detail(article_id):
-#     article = query_db('SELECT title, career_type, media, content, created_at, is_deleted FROM articles WHERE article_id = ?', [article_id], one=True)  # 修改這一行
-#     if not article or article[5] == 1:  # 修改這一行
-#         return jsonify({'message': '該文章已被刪除'}), 404  # 修改這一行
+@app.route('/favorites/detail/<int:article_id>', methods=['GET'])
+def get_favorite_detail(article_id):
+    article = query_db('SELECT title, career_type, media, content, created_at, is_deliete FROM articles WHERE article_id = ?', [article_id], one=True)  # 修改這一行
+    if not article or article[5] == 1:  # 修改這一行
+        return jsonify({'message': '該文章已被刪除'}), 404  # 修改這一行
 
-#     return jsonify({'title': article[0], 'career_type': article[1], 'media': article[2], 'content': article[3], 'created_at': article[4]}), 200
+    return jsonify({'message': '存在'}), 200
 
 @app.route('/careers/<type>', methods=['GET'])
 def get_career_type(type):
@@ -387,6 +539,46 @@ def get_career_type_job_detail(type, job_title):
         return jsonify(job_detail), 200
     except FileNotFoundError:
         return jsonify({'error': '類型不存在'}), 404
+@app.route('/favorites/add', methods=['POST'])
+def add_favorite():
+    user_id = request.json.get('user_id')
+    article_id = request.json.get('article_id')
 
+    if not user_id or not article_id:
+        return jsonify({'error': '缺少必要的參數'}), 400
+
+    query_db('INSERT INTO favorites (user_id, article_id) VALUES (?, ?)', [user_id, article_id])
+    return jsonify({'message': '文章已收藏'}), 201
+
+@app.route('/favorites/delete', methods=['DELETE'])
+def delete_favorite():
+    user_id = request.json.get('user_id')
+    article_id = request.json.get('article_id')
+
+    if not user_id or not article_id:
+        return jsonify({'error': '缺少必要的參數'}), 400
+
+    query_db('DELETE FROM favorites WHERE user_id = ? AND article_id = ?', [user_id, article_id])
+    return jsonify({'message': '文章已取消收藏'}), 200
+
+@app.route('/media/<path:filename>', methods=['GET'])
+def get_media(filename):
+    return send_from_directory('media', filename)
+
+@app.route('/favorites/check', methods=['POST'])
+def check_favorite():
+    data = request.json
+    user_id = data.get('user_id')
+    article_id = data.get('article_id')
+
+    if not user_id or not article_id:
+        return jsonify({'error': '缺少必要的參數'}), 400
+
+    favorite = query_db('SELECT * FROM favorites WHERE user_id = ? AND article_id = ?', [user_id, article_id], one=True)
+    print(favorite)
+    if favorite:
+        return jsonify({'message': '已收藏'}), 200
+    else:
+        return jsonify({'message': '未收藏'}), 200
 if __name__ == '__main__':
     app.run(debug=True)

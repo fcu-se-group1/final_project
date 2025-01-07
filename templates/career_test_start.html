@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Career test{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
+
+    <div class="col-12 col-lg-6">
+        <div class="card border-purple rounded-4 h-100" id="careerTestCard">
+            <div class="card-header p-3 px-4 d-flex justify-content-between align-items-center">
+                <h2 class="fw-bold mb-0" id="questionTitle">職涯測驗</h2>
+                <div class="progress" style="width: 50%;" id="progressContainer" hidden>
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" id="progressBar" role="progressbar" style="width: 0%;"></div>
+                </div>
+            </div>
+            
+            <div class="card-body text-purple d-flex flex-column justify-content-center align-items-center p-2 py-4" style="gap: 1rem;">
+                <div class="col-12 d-flex justify-content-center align-items-center">
+                    <h4 id="questionText" class="fw-bold mb-0 ">點擊按鈕即可進行測驗</h4>
+                </div>
+            </div>
+
+            <div class="card-footer px-4 d-flex justify-content-center" style="gap: 2rem;">
+                <a href="{{ url_for('chooseFunction') }}" class="btn btn-indigo" id="backButton">返回前頁</a>
+                <button class="btn btn-indigo" id="nextButton" onclick="checkLogin()">開始測驗</button>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
+
+{% block content1 %}
+<script>
+    const user_id = localStorage.getItem('user_id');
+    const user_role = localStorage.getItem('user_role');
+    const lastpage = localStorage.getItem('savepage');
+    const types = ['A', 'C', 'E', 'I', 'R', 'S'];
+    let questions = [];
+    let currentQuestionIndex = 0;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (user_role === 'professional') {
+            document.getElementById('careerTestCard').classList.add('disabled');
+            document.getElementById('nextButton').disabled = true;
+            Swal.fire({
+                title: '無法進行測驗',
+                text: '社會人士無法進行職涯測驗',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+        }
+    });
+
+    function checkLogin() {
+        console.log(user_id);
+        if (!user_id) {
+            Swal.fire({
+                title: '無法進行測驗',
+                text: '您尚未登入',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+        } else {
+            window.location.href = "{{ url_for('career_test') }}";
+        }
+    }
+</script>
+{% endblock %}

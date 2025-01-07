@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}add_comment{% endblock %}
+
+{% block content %}
+<style>
+    textarea {
+        resize: none; /* 移除調整大小功能 */
+        /* overflow: hidden; 移除滾動欄 */
+    }
+</style>
+<div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
+    <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+        <div class="card border-info rounded-4 h-100">
+
+            <div class="card-header d-flex justify-content-between p-3 px-4">
+                <h3 class="fw-bold mb-0">新增留言</h3>
+                <p id="courseCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
+            </div>
+
+            <div class="card-body col-12 text-info p-4 d-flex justify-content-center align-items-center">
+                <div class="col-12 p-0 d-flex flex-column justify-content-center align-items-center overflow-auto" style="height: 30vh; gap: 0.5rem;">
+                    <textarea id="commentContent" class="form-control" rows="5" placeholder="輸入想留言的內容..." oninput="autoResize(this)"></textarea>
+                </div>    
+            </div>
+
+            <div class="card-footer px-4">
+                <div class="d-flex justify-content-end" style="gap: 2rem;">
+                    <a href="#" class="btn btn-indigo" onclick="navigateToArticleContent()">返回</a>
+                    <a href="#" id="confirmButton" class="btn btn-indigo" onclick="sendOut()">確認</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content1 %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    function sendOut() {
+        const articleId = localStorage.getItem('article_id');
+        const userId = localStorage.getItem('user_id');
+        const content = document.getElementById('commentContent').value;
+
+        if (!content) {
+            Swal.fire({
+                title: '留言失敗',
+                text: '請輸入留言內容',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+            return;
+        }
+
+        fetch('/comments', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                article_id: articleId,
+                user_id: userId,
+                content: content
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                Swal.fire({
+                    title: '留言成功',
+                    text: '成功新增留言',
+                    icon: 'success',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                }).then(() => {
+                    window.location.href = '/article_content?article_id=' + articleId;
+                });
+            } else {
+                Swal.fire({
+                    title: '留言失敗',
+                    text: data.error || '無法新增留言',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire({
+                title: '留言失敗',
+                text: '無法新增留言',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+        });
+    }
+
+    function navigateToArticleContent() {
+        const articleId = localStorage.getItem('article_id');
+        window.location.href = '/article_content?article_id=' + articleId;
+    }
+
+    function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    }
+</script>
+{% endblock %}

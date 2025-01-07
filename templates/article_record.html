@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+
+{% block title %}Article record{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
+    <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+        <div class="card border-dark rounded-4 h-100">
+            <div class="card-header d-flex justify-content-between p-3 px-4">
+                <h3 class="fw-bold mb-0">發表過的文章</h3>
+                <p id="courseCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
+            </div>
+            <div class="card-body col-12 text-dark p-4 d-flex justify-content-center align-items-center" id="cardBody">
+                <div class="col-12 vh-40 p-0 d-flex flex-column justify-content-start align-items-center overflow-auto gap-3" id="overflowContainer">
+                    <p id="noRecordsMessage" class="text-secondary my-3 d-none">您尚未發表過文章</p>
+                </div>
+            </div>
+            <div class="card-footer px-4">
+                <div class="d-flex justify-content-end" style="gap: 2rem;">
+                    <a href="{{ url_for('social_personal_homepage') }}" class="btn btn-indigo">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content1 %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const userId = localStorage.getItem('user_id');
+        if (userId) {
+            fetchArticleRecords(userId);
+        } else {
+            Swal.fire({
+                title: '錯誤',
+                text: '無法獲取用戶ID',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+        }
+    });
+
+    async function fetchArticleRecords(userId) {
+        try {
+            const response = await fetch(`/user_articles/${userId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                displayArticleRecords(data);
+            } else {
+                Swal.fire({
+                    title: '錯誤',
+                    text: data.error || '無法獲取文章記錄',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                });
+            }
+        } catch (error) {
+            console.error('Error fetching article records:', error);
+        }
+    }
+
+    function displayArticleRecords(data) {
+        const overflowContainer = document.getElementById('overflowContainer');
+        const noRecordsMessage = document.getElementById('noRecordsMessage');
+
+        if (data.message) {
+            noRecordsMessage.classList.remove('d-none');
+            return;
+        }
+
+        data.forEach(article => {
+            const articleRow = document.createElement('div');
+            articleRow.className = 'col-12';
+
+            const articleDiv = document.createElement('div');
+            articleDiv.className = 'd-flex justify-content-end align-item-center article-record mb-3';
+
+            const titleLink = document.createElement('div');
+            titleLink.textContent = article.title;
+            titleLink.className = 'h4 mb-0 me-5 text-decoration-none text-purple text-center fw-bold';
+
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'd-flex';
+
+            const checkLink = document.createElement('a');
+            checkLink.href = `/article_content?article_id=${article.article_id}`;
+            checkLink.textContent = '查看';
+            checkLink.className = 'btn btn-sm btn-blue me-2';
+            checkLink.onclick = setSavePage();
+
+            const editLink = document.createElement('a');
+            editLink.href = `/edit_article?article_id=${article.article_id}`;
+            editLink.textContent = '編輯';
+            editLink.className = 'btn btn-sm btn-purple me-2';
+
+            const deleteLink = document.createElement('a');
+            deleteLink.href = '#';
+            deleteLink.textContent = '刪除';
+            deleteLink.className = 'btn btn-sm btn-peach';
+            deleteLink.addEventListener('click', function() {
+                deleteArticle(article.article_id);
+            });
+
+            buttonContainer.appendChild(checkLink);
+            buttonContainer.appendChild(editLink);
+            buttonContainer.appendChild(deleteLink);
+
+            const emptyDiv = document.createElement('div');
+            emptyDiv.className = 'col-3';
+
+            articleDiv.appendChild(titleLink);
+            articleDiv.appendChild(buttonContainer);
+            articleDiv.appendChild(emptyDiv);
+            articleRow.appendChild(articleDiv);
+            overflowContainer.appendChild(articleRow);
+        });
+    }
+
+    async function deleteArticle(articleId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+            try {
+                const response = await fetch(`/user_articles/delete/${articleId}`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                Swal.fire({
+                    title: '成功',
+                    text: '刪除成功',
+                    icon: 'success',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                }).then(() => {
+                    location.reload();
+                });
+                } 
+                else {
+                Swal.fire({
+                    title: '錯誤',
+                    text: '無法刪除文章',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                })
+                }
+            } catch (error) {
+                console.error('Error deleting article:', error);
+            }
+            }
+        });
+    }
+    function setSavePage() {
+        localStorage.setItem('savepage', window.location.href);
+    }
+</script>
+{% endblock %}

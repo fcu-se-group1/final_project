@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Type introduction{% endblock %}
+
+{% block content %}
+<div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
+    <div class="col-12 col-md-10 col-lg-8 col-xl-6">
+        <div class="card border-dark rounded-4 h-100">
+            <div class="card-header d-flex justify-content-between p-3 px-4">
+                <h3 class="fw-bold mb-0" id="typeTitle">X XX型</h3>
+                <p id="courseCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
+            </div>
+            <div class="card-body col-12 text-dark p-4 d-flex justify-content-center align-items-center" id="cardBody">
+                <div class="col-12 p-0 d-flex flex-column justify-content-start align-items-start overflow-auto" style="height: 41vh; gap: 0.5rem;" id="typeContent">
+                    
+                </div>
+            </div>
+            <div class="card-footer px-4">
+                <div class="d-flex justify-content-end" style="gap: 2rem;">
+                    <a href="{{ url_for('type_intro_choose') }}" class="btn btn-indigo">返回</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block content1 %}
+<script>
+    const type = localStorage.getItem('selectedType');
+    async function loadTypeIntro() {
+        const response = await fetch(`/careers/${type}`);
+        const data = await response.json();
+
+        if (response.ok) {
+            document.getElementById('typeTitle').textContent = data.title;
+            const typeContent = document.getElementById('typeContent');
+            typeContent.innerHTML = '';
+
+            data.sections.forEach(section => {
+                const sectionTitle = document.createElement('h4');
+                sectionTitle.textContent = section.title;
+                typeContent.appendChild(sectionTitle);
+
+                const sectionContent = document.createElement('p');
+                sectionContent.textContent = section.content;
+                typeContent.appendChild(sectionContent);
+            });
+
+            loadJobs();
+        } else {
+            document.getElementById('typeTitle').textContent = '類型不存在';
+        }
+    }
+
+    async function loadJobs() {
+        const response = await fetch(`/careers/${type}/jobs`);
+        const jobTitles = await response.json();
+
+        if (response.ok) {
+            const typeContent = document.getElementById('typeContent');
+
+            const jobSectionTitle = document.createElement('h4');
+            jobSectionTitle.textContent = '適合的職業';
+            typeContent.appendChild(jobSectionTitle);
+
+            const jobList = document.createElement('ul');
+            jobTitles.forEach(jobTitle => {
+                const jobItem = document.createElement('li');
+                const jobLink = document.createElement('a');
+                jobLink.href = `/job_intro?type=${type}&job_title=${jobTitle}`;
+                jobLink.textContent = jobTitle;
+                jobItem.appendChild(jobLink);
+                jobList.appendChild(jobItem);
+            });
+            typeContent.appendChild(jobList);
+        }
+    }
+
+    loadTypeIntro();
+</script>
+{% endblock %}
