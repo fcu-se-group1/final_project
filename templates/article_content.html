@@ -152,25 +152,36 @@
         }
     }
 
+
     async function checkFavoriteStatus(userId, articleId) {
         try {
-            const response = await fetch(`/favorites/detail/${articleId}`, {
-                method: 'GET',
+            const response = await fetch('/favorites/check', {
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
-                }
+                },
+                body: JSON.stringify({ user_id: userId, article_id: articleId })
             });
             const data = await response.json();
-
-            if (response.ok && data.message === '存在') {
-                document.getElementById('favoriteButton').textContent = '取消收藏';
-                document.getElementById('favoriteButton').onclick = function() { toggleFavorite('delete'); };
+            if (response.ok) {
+                if (data.message === '已收藏') {
+                    // 更新收藏按鈕狀態
+                    document.getElementById('favoriteButton').textContent = '取消收藏';
+                    document.getElementById('favoriteButton').onclick = function() {
+                        removeFavorite(userId, articleId);
+                    };
+                } else {
+                    document.getElementById('favoriteButton').textContent = '收藏';
+                    document.getElementById('favoriteButton').onclick = function() {
+                        addFavorite(userId, articleId);
+                    };
+                }
             } else {
-                document.getElementById('favoriteButton').textContent = '收藏';
-                document.getElementById('favoriteButton').onclick = function() { toggleFavorite('add'); };
+                alert(data.error || '無法檢查收藏狀態');
             }
         } catch (error) {
-            console.error('Error checking favorite status:', error);
+            console.error('Error:', error);
+            alert('無法檢查收藏狀態');
         }
     }
 
@@ -246,6 +257,49 @@
     function back() {
         window.location.href = '/chooseFunction';
         // window.history.back();
+    }
+    async function addFavorite(userId, articleId) {
+        try {
+            const response = await fetch('/favorites/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ user_id: userId, article_id: articleId })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                alert('文章已收藏');
+                checkFavoriteStatus(userId, articleId);
+            } else {
+                alert(data.error || '無法收藏文章');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('無法收藏文章');
+        }
+    }
+
+    async function removeFavorite(userId, articleId) {
+        try {
+            const response = await fetch('/favorites/delete', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ user_id: userId, article_id: articleId })
+            });
+            const data = await response.json();
+            if (response.ok) {
+                alert('文章已取消收藏');
+                checkFavoriteStatus(userId, articleId);
+            } else {
+                alert(data.error || '無法取消收藏');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('無法取消收藏');
+        }
     }
 </script>
 {% endblock %}
