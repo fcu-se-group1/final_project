@@ -11,14 +11,14 @@
 </style>
 <div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
     <div class="col-12 col-md-10 col-lg-8 col-xl-6">
-        <div class="card border-purple rounded-4 h-100">
+        <div class="card border-purple rounded-4 h-100" id="postArticleCard">
 
             <div class="card-header d-flex justify-content-between p-3 px-4">
                 <h3 class="fw-bold mb-0">發表文章</h3>
                 <p id="articleCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
             </div>
 
-            <div class="col-12 vh-45 card-body text-purple d-flex flex-column justify-content-center align-items-center p-4 overflow-auto"  id="overflowContainer">
+            <div class="col-12 vh-45 card-body text-purple d-flex flex-column justify-content-start align-items-center p-4 pb-2 overflow-auto"  id="overflowContainer">
                 <div class="col-lg-8 d-flex flex-column justify-content-center align-items-center" style="gap: 1rem;">
                     <div class="col-12 d-flex align-items-center">
                         <h5 class="card-title fw-bold mb-0">標題&nbsp;:&nbsp;</h5>
@@ -72,7 +72,7 @@
             <div class="card-footer px-4">
                 <div class="d-flex justify-content-end" style="gap: 2rem;">
                     <a href="{{ url_for('chooseFunction') }}" class="btn btn-indigo">返回</a>
-                    <a href="#" id="confirmButton" class="btn btn-indigo" onclick="postArticle()">發表</a>
+                    <button id="confirmButton" class="btn btn-indigo" onclick="postArticle()">發表</button>
                 </div>
             </div>
         </div>
@@ -83,6 +83,21 @@
 {% block content1 %}
 <script>
     let uploadedFiles = [];
+    const user_role = localStorage.getItem('user_role');
+    
+    document.addEventListener('DOMContentLoaded', function() {
+        if (user_role === 'job_seeker') {
+            document.getElementById('postArticleCard').classList.add('disabled');
+            document.getElementById('confirmButton').disabled = true;
+            Swal.fire({
+                title: '無法進行測驗',
+                text: '求職者無法進行發表文章',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+        }
+    });
 
     function uploadFile() {
         const fileInput = document.createElement('input');
@@ -119,8 +134,14 @@
         const careerTypeElement = document.querySelector('input[name="flexRadioDefault"]:checked');
         const content = document.getElementById('articleContent').value;
 
-        if (!title  ) {
-            alert('請輸入標題');
+        if (!title || !careerTypeElement || !content) {
+            Swal.fire({
+                title: '錯誤',
+                text: '請填寫所有必填欄位',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
             return;
         }
         if(!careerTypeElement){
@@ -152,14 +173,33 @@
 
             const result = await response.json();
             if (response.ok) {
-                alert('文章發表成功');
-                window.location.href = '/chooseFunction';
+                Swal.fire({
+                    title: '成功',
+                    text: '文章發表成功',
+                    icon: 'success',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                }).then(() => {
+                    window.location.href = '/chooseFunction';
+                });
             } else {
-                alert(result.error || '發表文章失敗');
+                Swal.fire({
+                    title: '錯誤',
+                    text: result.error || '發表文章失敗',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                });
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('發表文章失敗');
+            Swal.fire({
+                title: '錯誤',
+                text: '發表文章失敗',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
         }
     }
 
