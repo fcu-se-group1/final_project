@@ -18,6 +18,7 @@
                 </span>
                 <span class="d-flex justify-content-end align-items-center">
                     <a href="{{ url_for('homepage') }}" class="btn btn-custom ms-auto me-3">首頁</a>
+                    <p class="text-white me-3 mx-auto" id="userName" style="position: relative; top: 8px;"></p>
                     <a href="{{ url_for('log_in') }}" class="btn btn-custom ms-auto" id="authButton">登入</a>
                 </span>
             </div>
@@ -34,7 +35,7 @@
                         <span class="text-white">展望笑嘻嘻的未來</span>
                     </div>
                     <span class="footer_font text-white d-block d-md-inline">©Feng Chia University SEP(1432) Group1. All rights reserved.</span>
-                    <a href="#" class="footer_font  text-white ps-md-3"><span>使用條款</span></a>
+                    <a href="#" class="footer_font text-white ps-md-3"><span>使用條款</span></a>
                     <a href="#" class="footer_font text-white ps-3"><span>隱私權保護政策</span></a>
                 </div>
 
@@ -60,9 +61,12 @@
     
     document.addEventListener('DOMContentLoaded', function() {
         const user_id = localStorage.getItem('user_id');
+        const user_name = localStorage.getItem('user_name');
+        const userName = document.getElementById('userName');
         const authButton = document.getElementById('authButton');
 
         if (user_id) {
+            userName.textContent = user_name;
             authButton.textContent = '登出';
             authButton.href = '#';
             authButton.addEventListener('click', function() {
