@@ -4,16 +4,15 @@
 
 {% block content %}
     <div class="container d-flex flex-column justify-content-center align-items-center h-100">
-        <div class="row w-100 justify-content-center">
+        <div class="row w-100 justify-content-center mb-3">
             <div class="slogan text-center">
                 <h1 class="text-white">展望笑嘻嘻的未來</h1>
                 <h2 class="text-white">快來探索你的職涯，走出屬於自己的路</h2>
             </div>
         </div>
-        <div class="row w-100 justify-content-center mt-3">
-            <div class="col-2 text-center">
-                <a href="{{ url_for('chooseFunction') }}" class="btn btn-custom w-100">開始</a>
-            </div>
+        
+        <div class="row col-3 d-flex justify-content-center align-items-center">
+            <a href="{{ url_for('chooseFunction') }}" class="btn btn-custom">開始</a>
         </div>
     </div>
 {% endblock %}
