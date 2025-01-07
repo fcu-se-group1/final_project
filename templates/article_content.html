@@ -3,19 +3,36 @@
 {% block title %}Article content{% endblock %}
 
 {% block content %}
+<!-- <style>
+    .card-body{
+        font-family: '標楷體', 'DFKai-SB', serif;
+    }
+</style> -->
 <div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
     <div class="col-12 col-xl-10">
         <div class="card border-dark rounded-4 h-100">
-            <div class="card-header d-flex justify-content-between p-3 px-4">
-                <h3 id="articleTitle" class="fw-bold mb-0">文章標題</h3>
-                <p id="articleAuthor" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
+            <div class="card-header d-flex justify-content-start p-3 px-4">
+                <h1 id="articleTitle" class="fw-bold mb-0 me-4"></h1>
+                <div class="d-flex justify-content-center align-items-center text-center">
+                    <a href="#" id="favoriteButton" class="btn btn-sm btn-custom text-decoration-none rounded-3" onclick="toggleFavorite()">收藏</a>
+                </div>
             </div>
             <div class="card-body col-12 text-dark p-4 d-flex justify-content-center align-items-center" id="cardBody">
                 <div class="col-12 p-0 vh-40 d-flex flex-column justify-content-start align-items-start overflow-auto gap-2">
-                    <div id="mediaContent" class="mb-4"></div>
-                    <div id="articleContent" class="mb-4"></div>
-                    <h3>留言</h3>
-                    <div id="commentsSection"></div>
+                    <div class="col-12 d-flex justify-content-center">
+                        <span id="articleAuthor" class="col fw-bold mb-0 text-secondary"></span>
+                        <span id="articleType" class="col fw-bold mb-0 text-secondary"></span>
+                    </div>
+                    <h6 class="fw-bold text-secondary mb-0">文章內容:</h6>
+                    <div id="articleContent" class="col" style="font-family: '標楷體', 'DFKai-SB', serif;"></div>
+                    <div id="mediaContent" class="col"></div>
+                    <div class="col-12 d-flex justify-content-start align-items-center border-bottom border-black border-2 pb-2">
+                        <h6 class="fw-bold mb-0 me-4">問答留言板</h6>
+                        <div class="d-flex justify-content-center">
+                            <a href="#" id="addComment" class="btn btn-sm btn-custom text-decoration-none rounded-3" onclick="navigateToAddComment()">新增留言</a>
+                        </div>
+                    </div>
+                    <div class="col-12" id="commentsSection"></div>
                 </div>
             </div>
             <div class="card-footer px-4">
@@ -29,17 +46,18 @@
 {% endblock %}
 
 {% block content1 %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
         const articleId = urlParams.get('article_id');
-        if (articleId) {
+        const userId = localStorage.getItem('user_id');
+        if (articleId && userId) {
             fetchArticleDetails(articleId);
+            checkFavoriteStatus(userId, articleId);
         } else {
             Swal.fire({
                 title: '錯誤',
-                text: '無法獲取文章ID',
+                text: '無法獲取文章ID或用戶ID',
                 icon: 'error',
                 confirmButtonText: '確定',
                 scrollbarPadding: false
@@ -83,6 +101,7 @@
     function displayArticleDetails(data) {
         document.getElementById('articleTitle').textContent = data.title;
         document.getElementById('articleAuthor').textContent = `作者: ${data.username}`;
+        document.getElementById('articleType').textContent = `類型: ${data.career_type}`;
         document.getElementById('articleContent').textContent = data.content;
 
         const mediaContent = document.getElementById('mediaContent');
@@ -96,19 +115,24 @@
             } else {
                 const img = document.createElement('img');
                 img.src = `data:image/jpeg;base64,${btoa(media.content)}`;
-                img.className = 'w-100 mb-2'; // 縮小顯示
+                img.className = 'w-50 mb-2'; // 縮小顯示
                 mediaContent.appendChild(img);
             }
         });
 
         const commentsSection = document.getElementById('commentsSection');
-        data.comments.forEach(comment => {
+        data.comments.forEach((comment, index) => {
             const commentDiv = document.createElement('div');
-            commentDiv.className = 'mb-3';
+            commentDiv.className = `${index === data.comments.length - 1 ? '' : 'mb-3 border-bottom border-2'} pb-2`;
             commentDiv.innerHTML = `
-                <div class="fw-bold">${comment.username}:</div>
+                <div class="d-flex justify-content-start align-items-center gap-4">
+                    <div class="fw-bold text-purple">${comment.username}:</div>
+                    <div class="text-secondary d-none d-sm-block">${new Date(comment.created_at).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
+                    <button class="btn btn-sm btn-custom text-decoration-none rounded-3" onclick="navigateToReplyComment(${comment.comment_id}, '${comment.username}')">回覆</button>
+                </div>
+                <div class="d-block d-sm-none text-secondary">${new Date(comment.created_at).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
                 <div>${comment.content}</div>
-                <div class="text-muted">${comment.created_at}</div>
+                <div id="reCommentsSection-${comment.comment_id}"></div>
             `;
             commentsSection.appendChild(commentDiv);
 
@@ -116,13 +140,107 @@
                 const reCommentDiv = document.createElement('div');
                 reCommentDiv.className = 'ms-4 mb-2';
                 reCommentDiv.innerHTML = `
-                    <div class="fw-bold">${reComment.username}:</div>
+                    <div class="d-flex flex-column  jusify-content-start gap-md-4 flex-md-row">
+                        <div class="fw-bold text-purple">
+                        ${reComment.username} 回覆 ${comment.username}:</div>
+                        <div class="text-secondary">${new Date(reComment.created_at).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
+                    </div>
                     <div>${reComment.content}</div>
-                    <div class="text-muted">${reComment.created_at}</div>
                 `;
-                commentsSection.appendChild(reCommentDiv);
+                document.getElementById(`reCommentsSection-${comment.comment_id}`).appendChild(reCommentDiv);
             });
         });
+    }
+
+    async function checkFavoriteStatus(userId, articleId) {
+        try {
+            const response = await fetch(`/favorites/detail/${articleId}`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            const data = await response.json();
+
+            if (response.ok && data.message === '存在') {
+                document.getElementById('favoriteButton').textContent = '取消收藏';
+                document.getElementById('favoriteButton').onclick = function() { toggleFavorite('delete'); };
+            } else {
+                document.getElementById('favoriteButton').textContent = '收藏';
+                document.getElementById('favoriteButton').onclick = function() { toggleFavorite('add'); };
+            }
+        } catch (error) {
+            console.error('Error checking favorite status:', error);
+        }
+    }
+
+    async function toggleFavorite(action) {
+        const userId = localStorage.getItem('user_id');
+        const articleId = new URLSearchParams(window.location.search).get('article_id');
+
+        if (!userId || !articleId) {
+            Swal.fire({
+                title: '錯誤',
+                text: '無法獲取用戶ID或文章ID',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+            return;
+        }
+
+        try {
+            const response = await fetch(`/favorites/${action}`, {
+                method: action === 'add' ? 'POST' : 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ user_id: userId, article_id: articleId })
+            });
+            const data = await response.json();
+
+            if (response.ok) {
+                Swal.fire({
+                    title: '成功',
+                    text: data.message,
+                    icon: 'success',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                }).then(() => {
+                    checkFavoriteStatus(userId, articleId);
+                });
+            } else {
+                Swal.fire({
+                    title: '錯誤',
+                    text: data.error || '操作失敗',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                });
+            }
+        } catch (error) {
+            console.error('Error toggling favorite:', error);
+            Swal.fire({
+                title: '錯誤',
+                text: '操作失敗',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+        }
+    }
+
+    function navigateToAddComment() {
+        const articleId = new URLSearchParams(window.location.search).get('article_id');
+        localStorage.setItem('article_id', articleId);
+        window.location.href = '/add_comment';
+    }
+
+    function navigateToReplyComment(commentId, commentUsername) {
+        const articleId = new URLSearchParams(window.location.search).get('article_id');
+        localStorage.setItem('article_id', articleId);
+        localStorage.setItem('comment_id', commentId);
+        window.location.href = '/reply_author';
     }
 
     function back() {
