@@ -18,7 +18,7 @@
             </div>
             <div class="card-footer px-4">
                 <div class="d-flex justify-content-end" style="gap: 2rem;">
-                    <a href="{{ url_for('social_personal_homepage') }}" class="btn btn-indigo">返回</a>
+                    <a href="#" id="backButton" class="btn btn-indigo">返回</a>
                 </div>
             </div>
         </div>
@@ -30,11 +30,23 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const userId = localStorage.getItem('user_id');
+        const userRole = localStorage.getItem('user_role');
         if (userId) {
             fetchFavoriteArticles(userId);
         } else {
             alert('無法獲取用戶ID');
         }
+
+        const backButton = document.getElementById('backButton');
+        backButton.addEventListener('click', function() {
+            if (userRole === 'job_seeker') {
+                window.location.href = '{{ url_for("seeker_personal_homepage") }}';
+            } else if (userRole === 'professional') {
+                window.location.href = '{{ url_for("social_personal_homepage") }}';
+            } else {
+                alert('無法確定用戶角色');
+            }
+        });
     });
 
     async function fetchFavoriteArticles(userId) {
