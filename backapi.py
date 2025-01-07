@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask import Flask, request, jsonify, render_template, redirect, url_for,send_from_directory
 import datetime
 import sqlite3
 import json
@@ -436,30 +436,38 @@ def get_user_articles(user_id):
 
 #     return jsonify({'title': article[0], 'career_type': article[1], 'media': article[2], 'content': article[3], 'created_at': article[4]}), 200
 
-# @app.route('/user_articles/edit/<int:article_id>', methods=['POST'])
-# def edit_article(article_id):
-#     data = request.form
-#     title = data.get('title')
-#     career_type = data.get('career_type')
-#     content = data.get('content')
+@app.route('/user_articles/edit/<int:article_id>', methods=['POST'])
+def edit_article1(article_id):
+    data = request.form
+    title = data.get('title')
+    career_type = data.get('career_type')
+    content = data.get('content')
 
-#     if not title or not career_type or not content:
-#         return jsonify({'error': 'Missing required fields'}), 400
+    if not title or not career_type or not content:
+        return jsonify({'error': 'Missing required fields'}), 400
 
-#     media_files = request.files.getlist('media')
-#     media_filenames = []
+    media_files = request.files.getlist('media')
+    media_filenames = []
 
-#     for media_file in media_files:
-#         if media_file.filename == '':
-#             continue
-#         media_file.save(f'media/{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}_{media_file.filename}')
-#         media_filenames.append(media_file.filename)
+    # 處理新上傳的文件
+    for media_file in media_files:
+        if media_file.filename == '':
+            continue
+        media_filename = f'media/{datetime.datetime.now().strftime("%Y%m%d%H%M%S")}_{media_file.filename}'
+        os.makedirs(os.path.dirname(media_filename), exist_ok=True)
+        media_file.save(media_filename)
+        media_filenames.append(media_filename)
 
-#     media_filenames_json = json.dumps(media_filenames)
+    # 處理已存在的文件
+    existing_files = json.loads(data.get('existing_files', '[]'))
+    for existing_file in existing_files:
+        media_filenames.append(f'media/{existing_file}')
 
-#     query_db('UPDATE articles SET title = ?, career_type = ?, media = ?, content = ? WHERE article_id = ?', 
-#              [title, career_type,media_filenames_json, content, article_id])
-#     return jsonify({'message': '文章編輯成功'}), 200
+    media_filenames_json = json.dumps(media_filenames)
+
+    query_db('UPDATE articles SET title = ?, career_type = ?, media = ?, content = ? WHERE article_id = ?', 
+             [title, career_type, media_filenames_json, content, article_id])
+    return jsonify({'message': 'Article updated successfully'}), 200
 
 @app.route('/user_articles/delete/<int:article_id>', methods=['DELETE'])
 def delete_article(article_id):
@@ -533,6 +541,10 @@ def delete_favorite():
 
     query_db('DELETE FROM favorites WHERE user_id = ? AND article_id = ?', [user_id, article_id])
     return jsonify({'message': '文章已取消收藏'}), 200
+
+@app.route('/media/<path:filename>', methods=['GET'])
+def get_media(filename):
+    return send_from_directory('media', filename)
 
 if __name__ == '__main__':
     app.run(debug=True)
