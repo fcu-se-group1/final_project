@@ -56,17 +56,17 @@
             return;
         }
 
-        // 將資料轉換為一個陣列，並根據分數排序
-        const sortedData = Object.entries(data)
-            .map(([type, score]) => ({ type, score })) // 轉換為物件陣列
-            .sort((a, b) => b.score - a.score); // 根據分數從大到小排序
+        // 找出前三個最高的分數
+        const topThreeScores = Object.values(data)
+            .sort((a, b) => b - a)
+            .slice(0, 3);
 
         let tableContent = '<table class="table table-bordered"><thead><tr><th style="text-align: center;">類型</th><th style="text-align: center;">分數</th><th style="text-align: center;">備註</th></tr></thead><tbody>';
         
-        // 選擇前三個分數最高的類型
-        sortedData.forEach((item, index) => {
-            const annotation = index < 3 ? '*' : ''; // 前三名顯示 *，其餘顯示空白
-            tableContent += `<tr><td style="text-align: center;">${item.type}</td><td style="text-align: center;">${item.score}</td><td style="text-align: center;">${annotation}</td></tr>`;
+        // 遍歷原始資料，不進行排序
+        Object.entries(data).forEach(([type, score]) => {
+            const annotation = topThreeScores.includes(score) ? '*' : ''; // 前三名顯示 *
+            tableContent += `<tr><td style="text-align: center;">${type}</td><td style="text-align: center;">${score}</td><td style="text-align: center;">${annotation}</td></tr>`;
         });
 
         tableContent += '</tbody></table>';
