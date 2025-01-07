@@ -63,9 +63,9 @@
                 data.forEach(article => {
                     resultsContent += `
                         <tr class="text-center">
-                            <td>${article.career_type}</td>
-                            <td><a href="/article_content?article_id=${article.article_id}">${article.title}</a></td>
-                            <td>${article.username}</td>
+                            <td class="fw-bold">${article.career_type}</td>
+                            <td><a class="text-decoration-none fw-bold" href="/article_content?article_id=${article.article_id}">${article.title}</a></td>
+                            <td class="fw-bold">${article.username}</td>
                         </tr>
                     `;
                 });
@@ -78,9 +78,13 @@
         }
     }
 
+    function setArticleIdAndNavigate(articleId) {
+        localStorage.setItem('article_id', articleId);
+        window.location.href = '/article_content';
+    }
+
     function clearSelectedFunction() {
         localStorage.removeItem('selectedFunction');
     }
-
 </script>
 {% endblock %}
