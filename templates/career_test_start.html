@@ -6,7 +6,7 @@
 <div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
 
     <div class="col-12 col-lg-6">
-        <div class="card border-purple rounded-4 h-100">
+        <div class="card border-purple rounded-4 h-100" id="careerTestCard">
             <div class="card-header p-3 px-4 d-flex justify-content-between align-items-center">
                 <h2 class="fw-bold mb-0" id="questionTitle">職涯測驗</h2>
                 <div class="progress" style="width: 50%;" id="progressContainer" hidden>
@@ -18,18 +18,9 @@
                 <div class="col-12 d-flex justify-content-center align-items-center">
                     <h4 id="questionText" class="fw-bold mb-0 ">點擊按鈕即可進行測驗</h4>
                 </div>
-                <!-- <div class="col-6 d-flex justify-content-center align-items-center" id="agreementRow" hidden>
-                    <h5 class="col-4 fw-bold mb-0 d-flex justify-content-center">同意</h5>
-                    <span class="col-4 mx-3 d-flex justify-content-center">&lt;---&gt;</span>
-                    <h5 class="col-4 fw-bold mb-0 d-flex justify-content-center">不同意</h5>
-                </div>
-                <div class="col-12 d-flex justify-content-center align-items-center" id="rangeRow" hidden>
-                    <input type="range" class="form-range" id="answerRange" min="1" max="5" step="1">
-                </div> -->
             </div>
 
             <div class="card-footer px-4 d-flex justify-content-center" style="gap: 2rem;">
-                <!-- <button class="btn btn-indigo" id="prevButton" onclick="prevQuestion()" hidden>上一題</button> -->
                 <a href="{{ url_for('chooseFunction') }}" class="btn btn-indigo" id="backButton">返回前頁</a>
                 <button class="btn btn-indigo" id="nextButton" onclick="checkLogin()">開始測驗</button>
             </div>
@@ -44,10 +35,24 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
     const user_id = localStorage.getItem('user_id');
+    const user_role = localStorage.getItem('user_role');
     const lastpage = localStorage.getItem('savepage');
     const types = ['A', 'C', 'E', 'I', 'R', 'S'];
     let questions = [];
     let currentQuestionIndex = 0;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (user_role === 'professional') {
+            document.getElementById('careerTestCard').classList.add('disabled');
+            document.getElementById('nextButton').disabled = true;
+            Swal.fire({
+                title: '無法進行測驗',
+                text: '社會人士無法進行職涯測驗',
+                icon: 'error',
+                confirmButtonText: '確定'
+            });
+        }
+    });
 
     function checkLogin() {
         console.log(user_id);
@@ -63,77 +68,5 @@
             window.location.href = "{{ url_for('career_test') }}";
         }
     }
-
-    // async function loadQuestions() {
-    //     for (const type of types) {
-    //         const response = await fetch(`/show_career_test/${type}`);
-    //         const data = await response.json();
-    //         questions = questions.concat(data['選擇題'].map(q => ({ type: '選擇題', text: q })));
-    //     }
-    // }
-
-    // function startTest() {
-    //     document.getElementById('nextButton').textContent = '下一題';
-    //     document.getElementById('nextButton').onclick = nextQuestion;
-    //     document.getElementById('backButton').hidden = true;
-    //     document.getElementById('prevButton').hidden = true;
-    //     document.getElementById('progressContainer').hidden = false;
-    //     updateQuestion();
-    // }
-
-    // function updateQuestion() {
-    //     const question = questions[currentQuestionIndex];
-    //     document.getElementById('questionTitle').textContent = `第 ${currentQuestionIndex + 1} 題`;
-    //     document.getElementById('questionText').textContent = question.text;
-    //     const answerContainer = document.getElementById('answerContainer');
-    //     answerContainer.innerHTML = '';
-
-    //     // document.getElementById('agreementRow').hidden = false;
-    //     // document.getElementById('rangeRow').hidden = false;
-
-    //     const rangeInput = document.getElementById('answerRange');
-    //     rangeInput.value = 3; // 默認值為中立
-
-    //     const submitButton = document.createElement('button');
-    //     submitButton.textContent = '提交';
-    //     submitButton.onclick = () => saveAnswer(rangeInput.value);
-    //     answerContainer.appendChild(submitButton);
-    // }
-
-    // function saveAnswer(answer) {
-    //     // 保存答案的邏輯
-    //     console.log(`Question ${currentQuestionIndex + 1}: ${answer}`);
-    //     nextQuestion();
-    // }
-
-    // function nextQuestion() {
-    //     if (currentQuestionIndex < questions.length - 1) {
-    //         currentQuestionIndex++;
-    //         updateQuestion();
-    //         document.getElementById('prevButton').hidden = false;
-    //     } else {
-    //         Swal.fire({
-    //             title: '測驗完成',
-    //             text: '您已完成所有題目',
-    //             icon: 'success',
-    //             confirmButtonText: '確定'
-    //         }).then(() => {
-    //             // 提交測驗結果的邏輯
-    //             console.log('測驗完成');
-    //         });
-    //     }
-    // }
-
-    // function prevQuestion() {
-    //     if (currentQuestionIndex > 0) {
-    //         currentQuestionIndex--;
-    //         updateQuestion();
-    //         if (currentQuestionIndex === 0) {
-    //             document.getElementById('prevButton').hidden = true;
-    //         }
-    //     }
-    // }
-
-    // loadQuestions();
 </script>
 {% endblock %}
