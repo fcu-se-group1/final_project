@@ -231,7 +231,6 @@ def create_comment():
     article_id = data.get('article_id')
     user_id = data.get('user_id')
     content = data.get('content')
-
     if not article_id or not user_id or not content:
         return jsonify({'error': 'Missing required fields'}), 400
 
@@ -311,7 +310,6 @@ def get_article_details(article_id):
         JOIN users ON articles.author_id = users.user_id
         WHERE articles.article_id = ? AND is_deliete = 0
     ''', [article_id], one=True)
-
     if not article:
         return jsonify({'error': '文章不存在'}), 404
 

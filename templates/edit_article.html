@@ -16,7 +16,7 @@
                 <h3 class="fw-bold mb-0">編輯文章</h3>
                 <p id="articleCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
             </div>
-            <div class="col-12 card-body text-purple d-flex justify-content-center align-items-start p-4 overflow-auto">
+            <div class="col-12 vh-45 card-body text-purple d-flex flex-column align-items-center p-4 overflow-auto"  id="overflowContainer">
                 <div class="col-lg-8 d-flex flex-column justify-content-center align-items-center" style="gap: 1rem;">
                     <div class="col-12 d-flex align-items-center">
                         <h5 class="card-title fw-bold mb-0">標題&nbsp;:&nbsp;</h5>
@@ -105,6 +105,7 @@
                 document.getElementById('articleTitle').value = data.title;
                 document.getElementById('articleContent').value = data.content;
                 document.getElementById(data.career_type).checked = true;
+                autoResize(document.getElementById('articleContent'));
 
                 const fileList = document.getElementById('fileList');
                 data.media.forEach(media => {
@@ -167,10 +168,35 @@
         const title = document.getElementById('articleTitle').value;
         const careerTypeElement = document.querySelector('input[name="flexRadioDefault"]:checked');
         const content = document.getElementById('articleContent').value;
-
-        if (!title || !careerTypeElement || !content) {
-            alert('請填寫所有必填欄位');
+        if (!title ) {
+            Swal.fire({
+                title: '錯誤',
+                text: '請填寫標題',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
             return;
+        }
+        if(!careerTypeElement){
+            Swal.fire({
+                title: '錯誤',
+                text: '請填寫職業類型',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+            return
+        }
+        if(!content){
+            Swal.fire({
+                title: '錯誤',
+                text: '請填寫內容',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+            return
         }
 
         const careerType = careerTypeElement.id;
@@ -194,14 +220,33 @@
 
             const result = await response.json();
             if (response.ok) {
-                alert('文章更新成功');
-                window.location.href = '/chooseFunction';
+                Swal.fire({
+                    title: '成功',
+                    text: '文章更新成功',
+                    icon: 'success',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                }).then(function() {
+                    window.location.href = '/chooseFunction';
+                });
             } else {
-                alert(result.error || '更新文章失敗');
+                Swal.fire({
+                    title: '錯誤',
+                    text: '文章更新失敗',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                });
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('更新文章失敗');
+            Swal.fire({
+                title: '錯誤',
+                text: '文章更新失敗',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
         }
     }
 

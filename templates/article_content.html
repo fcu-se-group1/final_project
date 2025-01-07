@@ -97,8 +97,7 @@
         document.getElementById('articleTitle').textContent = data.title;
         document.getElementById('articleAuthor').textContent = `作者: ${data.username}`;
         document.getElementById('articleType').textContent = `類型: ${data.career_type}`;
-        document.getElementById('articleContent').textContent = data.content;
-
+        document.getElementById('articleContent').innerHTML = data.content.replace(/\n/g, '<br>');
         const mediaContent = document.getElementById('mediaContent');
         data.media.forEach(media => {
             if (media.filename.endsWith('.mp4')) {
@@ -129,7 +128,7 @@
                         <button class="btn btn-sm btn-custom text-decoration-none rounded-3" onclick="navigateToReplyComment(${comment.comment_id}, '${comment.username}')">回覆</button>
                     </div>
                     <div class="d-block d-sm-none text-secondary">${new Date(comment.created_at).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
-                    <div>${comment.content}</div>
+                    <div>${comment.content.replace(/\n/g, '<br>')}</div>
                     <div id="reCommentsSection-${comment.comment_id}"></div>
                 `;
                 commentsSection.appendChild(commentDiv);
@@ -143,7 +142,7 @@
                             ${reComment.username} 回覆 ${comment.username}:</div>
                             <div class="text-secondary">${new Date(reComment.created_at).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
                         </div>
-                        <div>${reComment.content}</div>
+                        <div>${reComment.content.replace(/\n/g, '<br>')}</div>
                     `;
                     document.getElementById(`reCommentsSection-${comment.comment_id}`).appendChild(reCommentDiv);
                 });
@@ -291,11 +290,11 @@
             } else {
                 Swal.fire({
                     title: '錯誤',
-                    text: data.error || '無法收藏文章',
+                    text: '無法收藏文章',
                     icon: 'error',
                     confirmButtonText: '確定',
                     scrollbarPadding: false
-                });
+                })
             }
         } catch (error) {
             console.error('Error:', error);
@@ -331,11 +330,11 @@
             } else {
                 Swal.fire({
                     title: '錯誤',
-                    text: data.error || '無法取消收藏',
+                    text: '無法取消收藏',
                     icon: 'error',
                     confirmButtonText: '確定',
                     scrollbarPadding: false
-                });
+                })
             }
         } catch (error) {
             console.error('Error:', error);
