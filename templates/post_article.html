@@ -144,6 +144,14 @@
             });
             return;
         }
+        if(!careerTypeElement){
+            alert("請輸入職業類型")
+            return
+        }
+        if(!content){
+            alert("請輸入內容")
+            return
+        }
 
         const careerType = careerTypeElement.id;
 
