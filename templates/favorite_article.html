@@ -104,8 +104,7 @@
             const titleLink = document.createElement('a');
             titleLink.href = '#';
             titleLink.textContent = article.title;
-            titleLink.className = 'h4 me-5 fw-bold d-block mb-1 text-decoration-none';
-            titleLink.style.color = 'blue';
+            titleLink.className = 'h4 me-5 fw-bold d-block mb-1 text-decoration-none text-purple';
             titleLink.addEventListener('click', function() {
                 checkArticleExists(article.article_id);
             });
