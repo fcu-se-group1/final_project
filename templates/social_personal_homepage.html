@@ -3,29 +3,28 @@
 {% block title %}Social personal homepage{% endblock %}
 
 {% block content %}
-    <div class="container d-flex flex-column justify-content-center align-items-center" style="height: 80%; gap: 1rem;">
-        <div class="d-flex flex-column justify-content-start align-items-center overflow-auto" style="height: 55vh;">
+    <div class="container d-flex flex-column justify-content-center align-items-center" style="height: 80%;">
+        <div class="d-flex flex-column justify-content-center align-items-center gap-4">
             <div class="text-white" >
                 <h1 class=" fw-bold mb-0">個人主頁</h1>
             </div>
     
-            <div class="col-12 d-flex flex-column justify-content-start align-items-center" >
+            <div class="col-12 d-flex flex-column justify-content-start justify-content-md-center align-items-center" >
     
-                <div class="col-9 row row-cols-1 row-cols-md-3 d-flex justify-content-center mb-md-3">
+                <div class="col-12 row row-cols-1 row-cols-md-3 d-flex justify-content-center align-items-center gap-4">
                     
-                    <div class="col-12">
+                    <div class="col">
                         <a href="{{ url_for('article_record') }}" class="text-decoration-none" onclick="chooseFunction('function_articleRecord')">
                             <div class="card border-purple h-100">
                                 <div class="card-header"><h4 class="fw-bold mb-0">發表過的文章</h4></div>
                                 <div class="card-body text-purple">
                                     <p class="card-text mb-0">進行職涯測驗，幫助您了解適合的職業方向。</p> <!-- ai暫時生成 -->
-                                    <span class="stretched-link"></span>
                                 </div>
                             </div>
                         </a>
                     </div>
                     
-                    <div class="col-12 ">
+                    <div class="col">
                         <a href="{{ url_for('favorite_article') }}" class="text-decoration-none" onclick="chooseFunction('function_favorite')">
                             <div class="card border-purple h-100">
                                 <div class="card-header"><h4 class="fw-bold mb-0">收藏的文章</h4></div>
@@ -40,11 +39,9 @@
 
             </div>
 
-            <div class="card-footer px-5">
-                <div class="d-flex justify-content-between" style="gap: 2rem;">
-                    <div class="d-flex" style="gap: 2rem;">
-                        <a href="{{ url_for('chooseFunction') }}" class="btn btn-indigo">返回</a>
-                    </div>
+            <div class="col-12 card-footer">
+                <div class="d-flex justify-content-center align-items-center">
+                    <a href="{{ url_for('chooseFunction') }}" class="btn btn-indigo">返回</a>
                 </div>
             </div>
 
