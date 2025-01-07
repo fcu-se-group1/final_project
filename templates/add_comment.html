@@ -1,8 +1,14 @@
 {% extends "base.html" %}
 
-{% block title %}新增留言{% endblock %}
+{% block title %}add_comment{% endblock %}
 
 {% block content %}
+<style>
+    textarea {
+        resize: none; /* 移除調整大小功能 */
+        /* overflow: hidden; 移除滾動欄 */
+    }
+</style>
 <div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
     <div class="col-12 col-md-10 col-lg-8 col-xl-6">
         <div class="card border-info rounded-4 h-100">
@@ -13,14 +19,14 @@
             </div>
 
             <div class="card-body col-12 text-info p-4 d-flex justify-content-center align-items-center">
-                <div class="col-12 p-0 d-flex flex-column justify-content-start align-items-start overflow-auto" style="height: 41vh; gap: 0.5rem;">
-                    <textarea id="commentContent" class="form-control" rows="5" placeholder="輸入您的留言..."></textarea>
+                <div class="col-12 p-0 d-flex flex-column justify-content-center align-items-center overflow-auto" style="height: 30vh; gap: 0.5rem;">
+                    <textarea id="commentContent" class="form-control" rows="5" placeholder="輸入想留言的內容..." oninput="autoResize(this)"></textarea>
                 </div>    
             </div>
 
             <div class="card-footer px-4">
                 <div class="d-flex justify-content-end" style="gap: 2rem;">
-                    <a href="{{ url_for('article_content') }}" class="btn btn-indigo">返回</a>
+                    <a href="#" class="btn btn-indigo" onclick="navigateToArticleContent()">返回</a>
                     <a href="#" id="confirmButton" class="btn btn-indigo" onclick="sendOut()">確認</a>
                 </div>
             </div>
@@ -30,6 +36,7 @@
 {% endblock %}
 
 {% block content1 %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     function sendOut() {
         const articleId = localStorage.getItem('article_id');
@@ -37,7 +44,13 @@
         const content = document.getElementById('commentContent').value;
 
         if (!content) {
-            alert('留言內容不可空白');
+            Swal.fire({
+                title: '留言失敗',
+                text: '請輸入留言內容',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
             return;
         }
 
@@ -55,16 +68,45 @@
         .then(response => response.json())
         .then(data => {
             if (data.message) {
-                alert(data.message);
-                window.location.href = '/article_content';
+                Swal.fire({
+                    title: '留言成功',
+                    text: '成功新增留言',
+                    icon: 'success',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                }).then(() => {
+                    window.location.href = '/article_content?article_id=' + articleId;
+                });
             } else {
-                alert(data.error || '無法新增留言');
+                Swal.fire({
+                    title: '留言失敗',
+                    text: data.error || '無法新增留言',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('無法新增留言');
+            Swal.fire({
+                title: '留言失敗',
+                text: '無法新增留言',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
         });
+    }
+
+    function navigateToArticleContent() {
+        const articleId = localStorage.getItem('article_id');
+        window.location.href = '/article_content?article_id=' + articleId;
+    }
+
+    function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
     }
 </script>
 {% endblock %}
