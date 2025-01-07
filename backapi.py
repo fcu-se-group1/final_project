@@ -331,6 +331,17 @@ def get_article_details(article_id):
             JOIN users ON re_comments.user_id = users.user_id
             WHERE re_comments.comment_id = ?
         ''', [comment_id])
+
+        for i, re_comment in enumerate(re_comment_list):
+            re_comment = list(re_comment)
+
+            re_comment[3] = datetime.datetime.strptime(re_comment[3], "%Y-%m-%d %H:%M:%S")
+            re_comment[3] = re_comment[3].replace(tzinfo=datetime.timezone.utc)
+            re_comment[3] = re_comment[3].astimezone(datetime.timezone(datetime.timedelta(hours=8)))
+            re_comment[3] = re_comment[3].strftime("%Y-%m-%d %H:%M:%S")
+            # 更新列表中的該元素
+            re_comment_list[i] = tuple(re_comment)
+
         re_comments = []
         for re_comment in re_comment_list:
             re_comments.append({
@@ -352,6 +363,16 @@ def get_article_details(article_id):
                     'filename': os.path.basename(media_file),
                     'content': f.read().decode('latin1')  # 使用latin1編碼以避免二進制數據損壞
                 })
+
+    for i, comment in enumerate(comments):
+        comment = list(comment)
+
+        comment[3] = datetime.datetime.strptime(comment[3], "%Y-%m-%d %H:%M:%S")
+        comment[3] = comment[3].replace(tzinfo=datetime.timezone.utc)
+        comment[3] = comment[3].astimezone(datetime.timezone(datetime.timedelta(hours=8)))
+        comment[3] = comment[3].strftime("%Y-%m-%d %H:%M:%S")
+        # 更新列表中的該元素
+        comments[i] = tuple(comment)
 
     # 構建返回結果
     result = {
