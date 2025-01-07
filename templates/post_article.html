@@ -119,9 +119,17 @@
         const careerTypeElement = document.querySelector('input[name="flexRadioDefault"]:checked');
         const content = document.getElementById('articleContent').value;
 
-        if (!title || !careerTypeElement || !content) {
-            alert('請填寫所有必填欄位');
+        if (!title  ) {
+            alert('請輸入標題');
             return;
+        }
+        if(!careerTypeElement){
+            alert("請輸入職業類型")
+            return
+        }
+        if(!content){
+            alert("請輸入內容")
+            return
         }
 
         const careerType = careerTypeElement.id;
