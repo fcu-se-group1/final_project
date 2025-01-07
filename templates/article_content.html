@@ -41,7 +41,6 @@
 {% endblock %}
 
 {% block content1 %}
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -151,7 +150,6 @@
         }
     }
 
-
     async function checkFavoriteStatus(userId, articleId) {
         try {
             const response = await fetch('/favorites/check', {
@@ -176,11 +174,23 @@
                     };
                 }
             } else {
-                alert(data.error || '無法檢查收藏狀態');
+                Swal.fire({
+                    title: '錯誤',
+                    text: data.error || '無法檢查收藏狀態',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                });
             }
         } catch (error) {
             console.error('Error:', error);
-            alert('無法檢查收藏狀態');
+            Swal.fire({
+                title: '錯誤',
+                text: '無法檢查收藏狀態',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
         }
     }
 
@@ -257,6 +267,7 @@
         window.location.href = '/chooseFunction';
         // window.history.back();
     }
+
     async function addFavorite(userId, articleId) {
         try {
             const response = await fetch('/favorites/add', {
@@ -270,16 +281,16 @@
             if (response.ok) {
                 Swal.fire({
                     title: '成功',
-                    text: '收藏成功',
+                    text: '文章已收藏',
                     icon: 'success',
                     confirmButtonText: '確定',
                     scrollbarPadding: false
-                })
+                });
                 checkFavoriteStatus(userId, articleId);
             } else {
                 Swal.fire({
                     title: '錯誤',
-                    text: '收藏失敗',
+                    text: '無法收藏文章',
                     icon: 'error',
                     confirmButtonText: '確定',
                     scrollbarPadding: false
@@ -289,11 +300,11 @@
             console.error('Error:', error);
             Swal.fire({
                 title: '錯誤',
-                text: '收藏失敗',
+                text: '無法收藏文章',
                 icon: 'error',
                 confirmButtonText: '確定',
                 scrollbarPadding: false
-            })
+            });
         }
     }
 
@@ -310,16 +321,16 @@
             if (response.ok) {
                 Swal.fire({
                     title: '成功',
-                    text: '取消收藏成功',
+                    text: '文章已取消收藏',
                     icon: 'success',
                     confirmButtonText: '確定',
                     scrollbarPadding: false
-                })
+                });
                 checkFavoriteStatus(userId, articleId);
             } else {
                 Swal.fire({
                     title: '錯誤',
-                    text: '取消收藏失敗',
+                    text: '無法取消收藏',
                     icon: 'error',
                     confirmButtonText: '確定',
                     scrollbarPadding: false
@@ -329,11 +340,11 @@
             console.error('Error:', error);
             Swal.fire({
                 title: '錯誤',
-                text: '取消收藏失敗',
+                text: '無法取消收藏',
                 icon: 'error',
                 confirmButtonText: '確定',
                 scrollbarPadding: false
-            })
+            });
         }
     }
 </script>

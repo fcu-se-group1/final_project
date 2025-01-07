@@ -11,7 +11,7 @@
                 <p id="courseCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
             </div>
             <div class="card-body col-12 text-dark p-4 d-flex justify-content-center align-items-center" id="cardBody">
-                <div class="col-12 vh-50 p-0 d-flex flex-column justify-content-start align-items-center overflow-auto" id="overflowContainer">
+                <div class="col-12 vh-40 p-0 d-flex flex-column justify-content-start align-items-center overflow-auto" id="overflowContainer">
                     <p id="noFavoritesMessage" class="text-secondary my-3 d-none">您尚未收藏任何文章</p>
                     <div class="col-12" id="favorite_articles"></div>
                 </div>
@@ -35,7 +35,13 @@
         if (userId) {
             fetchFavoriteArticles(userId);
         } else {
-            alert('無法獲取用戶ID');
+            Swal.fire({
+                title: '錯誤',
+                text: '無法獲取用戶ID',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
         }
 
         const backButton = document.getElementById('backButton');
@@ -45,7 +51,13 @@
             } else if (userRole === 'professional') {
                 window.location.href = '{{ url_for("social_personal_homepage") }}';
             } else {
-                alert('無法確定用戶角色');
+                Swal.fire({
+                    title: '錯誤',
+                    text: '無法確定用戶角色',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                });
             }
         });
     });
@@ -63,7 +75,13 @@
             if (response.ok) {
                 displayFavoriteArticles(data);
             } else {
-                alert(data.error || '無法獲取收藏的文章');
+                Swal.fire({
+                    title: '錯誤',
+                    text: data.error || '無法獲取收藏的文章',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                });
             }
         } catch (error) {
             console.error('Error fetching favorite articles:', error);
@@ -86,7 +104,7 @@
             const titleLink = document.createElement('a');
             titleLink.href = '#';
             titleLink.textContent = article.title;
-            titleLink.className = 'h4 me-5 fw-bold d-block mb-1';
+            titleLink.className = 'h4 me-5 fw-bold d-block mb-1 text-decoration-none';
             titleLink.style.color = 'blue';
             titleLink.addEventListener('click', function() {
                 checkArticleExists(article.article_id);
@@ -120,10 +138,12 @@
                 window.location.href = `/article_content?article_id=${articleId}`;
             } else {
                 Swal.fire({
-                    icon: 'error',
                     title: '錯誤',
-                    text: '該文章已被刪除'
-                });            
+                    text: data.error || '該文章已被刪除',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                });
             }
         } catch (error) {
             console.error('Error checking article existence:', error);
@@ -131,44 +151,42 @@
     }
 
     async function deleteFavoriteArticle(articleId) {
-    try {
-        const userId = localStorage.getItem('user_id');
-        const response = await fetch('/favorites/delete', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                user_id: userId,
-                article_id: articleId
-            })
-        });
-        const data = await response.json();
+        try {
+            const userId = localStorage.getItem('user_id');
+            const response = await fetch('/favorites/delete', {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_id: userId,
+                    article_id: articleId
+                })
+            });
+            const data = await response.json();
 
-        if (response.ok) {
-            Swal.fire({
-                icon: 'success',
-                title: '成功',
-                text: '取消收藏成功'
-            }).then(() => {
-                window.location.reload();
-            });
-        } else {
-            Swal.fire({
-                icon: 'error',
-                title: '錯誤',
-                text: data.error || '取消收藏失敗'
-            });
+            if (response.ok) {
+                Swal.fire({
+                    title: '成功',
+                    text: '取消收藏成功',
+                    icon: 'success',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                }).then(() => {
+                    window.location.reload();
+                });
+            } else {
+                Swal.fire({
+                    title: '錯誤',
+                    text: data.error || '取消收藏失敗',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                });
+            }
+        } catch (error) {
+            console.error('Error deleting favorite article:', error);
         }
-    } catch (error) {
-        console.error('Error deleting favorite article:', error);
-        Swal.fire({
-            icon: 'error',
-            title: '錯誤',
-            text: '取消收藏失敗'
-        });
     }
-}
-
 </script>
 {% endblock %}
