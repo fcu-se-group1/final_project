@@ -94,8 +94,7 @@
             const data = await response.json();
 
             if (response.ok && data.message === '存在') {
-                localStorage.setItem('article_id', articleId);
-                window.location.href = '/article_content';
+                window.location.href = `/article_content?article_id=${articleId}`;
             } else {
                 alert(data.error || '該文章已被刪除');
             }
