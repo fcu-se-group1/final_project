@@ -3,11 +3,6 @@
 {% block title %}Article content{% endblock %}
 
 {% block content %}
-<!-- <style>
-    .card-body{
-        font-family: '標楷體', 'DFKai-SB', serif;
-    }
-</style> -->
 <div class="container d-flex justify-content-center align-items-center" style="height: 80%;">
     <div class="col-12 col-xl-10">
         <div class="card border-dark rounded-4 h-100">
@@ -24,7 +19,7 @@
                         <span id="articleType" class="col fw-bold mb-0 text-secondary"></span>
                     </div>
                     <h6 class="fw-bold text-secondary mb-0">文章內容:</h6>
-                    <div id="articleContent" class="col" style="font-family: '標楷體', 'DFKai-SB', serif;"></div>
+                    <div id="articleContent" class="col-12" style="font-family: '標楷體', 'DFKai-SB', serif;"></div>
                     <div id="mediaContent" class="col"></div>
                     <div class="col-12 d-flex justify-content-start align-items-center border-bottom border-black border-2 pb-2">
                         <h6 class="fw-bold mb-0 me-4">問答留言板</h6>
@@ -46,6 +41,7 @@
 {% endblock %}
 
 {% block content1 %}
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const urlParams = new URLSearchParams(window.location.search);
@@ -121,35 +117,39 @@
         });
 
         const commentsSection = document.getElementById('commentsSection');
-        data.comments.forEach((comment, index) => {
-            const commentDiv = document.createElement('div');
-            commentDiv.className = `${index === data.comments.length - 1 ? '' : 'mb-3 border-bottom border-2'} pb-2`;
-            commentDiv.innerHTML = `
-                <div class="d-flex justify-content-start align-items-center gap-4">
-                    <div class="fw-bold text-purple">${comment.username}:</div>
-                    <div class="text-secondary d-none d-sm-block">${new Date(comment.created_at).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
-                    <button class="btn btn-sm btn-custom text-decoration-none rounded-3" onclick="navigateToReplyComment(${comment.comment_id}, '${comment.username}')">回覆</button>
-                </div>
-                <div class="d-block d-sm-none text-secondary">${new Date(comment.created_at).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
-                <div>${comment.content}</div>
-                <div id="reCommentsSection-${comment.comment_id}"></div>
-            `;
-            commentsSection.appendChild(commentDiv);
-
-            comment.re_comments.forEach(reComment => {
-                const reCommentDiv = document.createElement('div');
-                reCommentDiv.className = 'ms-4 mb-2';
-                reCommentDiv.innerHTML = `
-                    <div class="d-flex flex-column  jusify-content-start gap-md-4 flex-md-row">
-                        <div class="fw-bold text-purple">
-                        ${reComment.username} 回覆 ${comment.username}:</div>
-                        <div class="text-secondary">${new Date(reComment.created_at).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
+        if (data.comments.length === 0) {
+            commentsSection.innerHTML = '<h6 class="fw-bold text-secondary mb-0">(此文章還沒有任何留言)</h6>';
+        } else {
+            data.comments.forEach((comment, index) => {
+                const commentDiv = document.createElement('div');
+                commentDiv.className = `mb-3 ${index === data.comments.length - 1 ? '' : 'border-bottom'} pb-2`;
+                commentDiv.innerHTML = `
+                    <div class="d-flex justify-content-start align-items-center gap-4">
+                        <div class="fw-bold text-purple">${comment.username}:</div>
+                        <div class="text-secondary d-none d-sm-block">${new Date(comment.created_at).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
+                        <button class="btn btn-sm btn-custom text-decoration-none rounded-3" onclick="navigateToReplyComment(${comment.comment_id}, '${comment.username}')">回覆</button>
                     </div>
-                    <div>${reComment.content}</div>
+                    <div class="d-block d-sm-none text-secondary">${new Date(comment.created_at).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
+                    <div>${comment.content}</div>
+                    <div id="reCommentsSection-${comment.comment_id}"></div>
                 `;
-                document.getElementById(`reCommentsSection-${comment.comment_id}`).appendChild(reCommentDiv);
+                commentsSection.appendChild(commentDiv);
+
+                comment.re_comments.forEach(reComment => {
+                    const reCommentDiv = document.createElement('div');
+                    reCommentDiv.className = 'ms-4 mb-2';
+                    reCommentDiv.innerHTML = `
+                        <div class="d-flex flex-column  jusify-content-start gap-md-4 flex-md-row">
+                            <div class="fw-bold text-purple">
+                            ${reComment.username} 回覆 ${comment.username}:</div>
+                            <div class="text-secondary">${new Date(reComment.created_at).toLocaleString('zh-TW', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' })}</div>
+                        </div>
+                        <div>${reComment.content}</div>
+                    `;
+                    document.getElementById(`reCommentsSection-${comment.comment_id}`).appendChild(reCommentDiv);
+                });
             });
-        });
+        }
     }
 
     async function checkFavoriteStatus(userId, articleId) {
