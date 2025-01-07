@@ -134,10 +134,10 @@
         const careerTypeElement = document.querySelector('input[name="flexRadioDefault"]:checked');
         const content = document.getElementById('articleContent').value;
 
-        if (!title || !careerTypeElement || !content) {
+        if (!title ) {
             Swal.fire({
                 title: '錯誤',
-                text: '請填寫所有必填欄位',
+                text: '請填寫標題',
                 icon: 'error',
                 confirmButtonText: '確定',
                 scrollbarPadding: false
@@ -145,11 +145,23 @@
             return;
         }
         if(!careerTypeElement){
-            alert("請輸入職業類型")
+            Swal.fire({
+                title: '錯誤',
+                text: '請填寫職業類型',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
             return
         }
         if(!content){
-            alert("請輸入內容")
+            Swal.fire({
+                title: '錯誤',
+                text: '請填寫內容',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
             return
         }
 
