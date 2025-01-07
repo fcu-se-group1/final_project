@@ -103,28 +103,51 @@
     }
 
     async function deleteArticle(articleId) {
-        if (confirm('確定要刪除這篇文章嗎？')) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Yes, delete it!"
+        }).then(async (result) => {
+            if (result.isConfirmed) {
             try {
                 const response = await fetch(`/user_articles/delete/${articleId}`, {
-                    method: 'DELETE',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
                 });
                 const data = await response.json();
 
                 if (response.ok) {
-                    alert(data.message);
+                Swal.fire({
+                    title: '成功',
+                    text: '刪除成功',
+                    icon: 'success',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                }).then(() => {
                     location.reload();
-                } else {
-                    alert(data.error || '無法刪除文章');
+                });
+                } 
+                else {
+                Swal.fire({
+                    title: '錯誤',
+                    text: '無法刪除文章',
+                    icon: 'error',
+                    confirmButtonText: '確定',
+                    scrollbarPadding: false
+                })
                 }
             } catch (error) {
                 console.error('Error deleting article:', error);
             }
-        }
+            }
+        });
     }
-
     function setSavePage() {
         localStorage.setItem('savepage', window.location.href);
     }

@@ -119,7 +119,11 @@
             if (response.ok && data.message === '存在') {
                 window.location.href = `/article_content?article_id=${articleId}`;
             } else {
-                alert(data.error || '該文章已被刪除');
+                Swal.fire({
+                    icon: 'error',
+                    title: '錯誤',
+                    text: '該文章已被刪除'
+                });            
             }
         } catch (error) {
             console.error('Error checking article existence:', error);
@@ -142,13 +146,27 @@
         const data = await response.json();
 
         if (response.ok) {
-            alert('取消收藏成功');
-            window.location.reload();
+            Swal.fire({
+                icon: 'success',
+                title: '成功',
+                text: '取消收藏成功'
+            }).then(() => {
+                window.location.reload();
+            });
         } else {
-            alert(data.error || '取消收藏失敗');
+            Swal.fire({
+                icon: 'error',
+                title: '錯誤',
+                text: data.error || '取消收藏失敗'
+            });
         }
     } catch (error) {
         console.error('Error deleting favorite article:', error);
+        Swal.fire({
+            icon: 'error',
+            title: '錯誤',
+            text: '取消收藏失敗'
+        });
     }
 }
 
