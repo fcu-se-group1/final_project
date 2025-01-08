@@ -102,9 +102,13 @@
             const articleDiv = document.createElement('div');
             articleDiv.className = 'd-flex justify-content-end align-item-center favorite-article mb-3';
 
-            const titleLink = document.createElement('div');
+            const titleLink = document.createElement('a');
+            titleLink.href = '#';
             titleLink.textContent = article.title;
             titleLink.className = 'h4 mb-0 me-5 text-decoration-none text-purple text-center fw-bold';
+            titleLink.addEventListener('click', function() {
+                checkArticleExists(article.article_id);
+            });
 
             const buttonContainer = document.createElement('div');
             buttonContainer.className = 'd-flex';
