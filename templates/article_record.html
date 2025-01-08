@@ -91,17 +91,22 @@
             const buttonContainer = document.createElement('div');
             buttonContainer.className = 'd-flex';
 
+            const checkLinkDiv = document.createElement('div');
             const checkLink = document.createElement('a');
             checkLink.href = `/article_content?article_id=${article.article_id}`;
             checkLink.textContent = '查看';
             checkLink.className = 'btn btn-sm btn-blue me-2';
             checkLink.onclick = setSavePage();
+            checkLinkDiv.appendChild(checkLink);
 
+            const editLinkDiv = document.createElement('div');
             const editLink = document.createElement('a');
             editLink.href = `/edit_article?article_id=${article.article_id}`;
             editLink.textContent = '編輯';
             editLink.className = 'btn btn-sm btn-purple me-2';
+            editLinkDiv.appendChild(editLink);
 
+            const deleteLinkDiv = document.createElement('div');
             const deleteLink = document.createElement('a');
             deleteLink.href = '#';
             deleteLink.textContent = '刪除';
@@ -109,17 +114,14 @@
             deleteLink.addEventListener('click', function() {
                 deleteArticle(article.article_id);
             });
+            deleteLinkDiv.appendChild(deleteLink);
 
-            buttonContainer.appendChild(checkLink);
-            buttonContainer.appendChild(editLink);
-            buttonContainer.appendChild(deleteLink);
-
-            const emptyDiv = document.createElement('div');
-            emptyDiv.className = 'col-3';
+            buttonContainer.appendChild(checkLinkDiv);
+            buttonContainer.appendChild(editLinkDiv);
+            buttonContainer.appendChild(deleteLinkDiv);
 
             articleDiv.appendChild(titleLink);
             articleDiv.appendChild(buttonContainer);
-            articleDiv.appendChild(emptyDiv);
             articleRow.appendChild(articleDiv);
             overflowContainer.appendChild(articleRow);
         });
@@ -137,41 +139,41 @@
             cancelButtonText: "取消"
         }).then(async (result) => {
             if (result.isConfirmed) {
-            try {
-                const response = await fetch(`/user_articles/delete/${articleId}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-                });
-                const data = await response.json();
+                try {
+                    const response = await fetch(`/user_articles/delete/${articleId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    const data = await response.json();
 
-                if (response.ok) {
-                Swal.fire({
-                    title: '成功',
-                    text: '刪除成功',
-                    icon: 'success',
-                    confirmButtonText: '確定',
-                    scrollbarPadding: false
-                }).then(() => {
-                    location.reload();
-                });
-                } 
-                else {
-                Swal.fire({
-                    title: '錯誤',
-                    text: '無法刪除文章',
-                    icon: 'error',
-                    confirmButtonText: '確定',
-                    scrollbarPadding: false
-                })
+                    if (response.ok) {
+                        Swal.fire({
+                            title: '成功',
+                            text: '刪除成功',
+                            icon: 'success',
+                            confirmButtonText: '確定',
+                            scrollbarPadding: false
+                        }).then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            title: '錯誤',
+                            text: '無法刪除文章',
+                            icon: 'error',
+                            confirmButtonText: '確定',
+                            scrollbarPadding: false
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error deleting article:', error);
                 }
-            } catch (error) {
-                console.error('Error deleting article:', error);
-            }
             }
         });
     }
+
     function setSavePage() {
         localStorage.setItem('savepage', window.location.href);
     }
