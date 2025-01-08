@@ -46,9 +46,16 @@
         const urlParams = new URLSearchParams(window.location.search);
         const articleId = urlParams.get('article_id');
         const userId = localStorage.getItem('user_id');
-        if (articleId && userId) {
-            fetchArticleDetails(articleId);
+        if (!userId) {
+            favoriteButton.textContent = '尚未登入';
+            favoriteButton.classList.add('disabled');
+            favoriteButton.onclick = null;
+        }
+        else{
             checkFavoriteStatus(userId, articleId);
+        }
+        if (articleId ) {
+            fetchArticleDetails(articleId);
         } else {
             Swal.fire({
                 title: '錯誤',
@@ -251,12 +258,35 @@
     }
 
     function navigateToAddComment() {
+        const userId = localStorage.getItem('user_id');
+
+        if (!userId) {
+            Swal.fire({
+                title: '錯誤',
+                text: '請先登入',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+            return;
+        }
         const articleId = new URLSearchParams(window.location.search).get('article_id');
         localStorage.setItem('article_id', articleId);
         window.location.href = '/add_comment';
     }
 
     function navigateToReplyComment(commentId, commentUsername) {
+        const userId = localStorage.getItem('user_id');        
+        if (!userId) {
+            Swal.fire({
+                title: '錯誤',
+                text: '請先登入',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+            return;
+        }
         const articleId = new URLSearchParams(window.location.search).get('article_id');
         localStorage.setItem('article_id', articleId);
         localStorage.setItem('comment_id', commentId);
