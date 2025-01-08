@@ -17,9 +17,10 @@
                    <span class="text-white">展望笑嘻嘻的未來</span>
                 </span>
                 <span class="d-flex justify-content-end align-items-center">
-                    <a href="{{ url_for('homepage') }}" class="btn btn-custom ms-auto me-3">首頁</a>
-                    <p class="text-white me-3 mx-auto" id="userName" style="position: relative; top: 8px;"></p>
-                    <a href="{{ url_for('log_in') }}" class="btn btn-custom ms-auto" id="authButton">登入</a>
+                    <p class="text-white me-3 mb-0 d-none d-md-inline" id="userName"></p>
+                    <p class="text-white me-3 mb-0 d-none d-md-inline" id="userRole"></p>
+                    <a href="{{ url_for('homepage') }}" class="btn btn-sm btn-sm-btn btn-custom ms-auto me-3">首頁</a>
+                    <a href="{{ url_for('log_in') }}" class="btn btn-sm btn-sm-btn btn-custom ms-auto" id="authButton">登入</a>
                 </span>
             </div>
         </nav>
@@ -62,11 +63,18 @@
     document.addEventListener('DOMContentLoaded', function() {
         const user_id = localStorage.getItem('user_id');
         const user_name = localStorage.getItem('user_name');
+        const user_role = localStorage.getItem('user_role');
         const userName = document.getElementById('userName');
+        const userRole = document.getElementById('userRole');
         const authButton = document.getElementById('authButton');
 
         if (user_id) {
-            userName.textContent = user_name;
+            userName.textContent = '帳號: ' + user_name;
+            if(user_role === 'professional'){
+                userRole.textContent = '身分: 社會人士';
+            }else if(user_role === "job_seeker"){
+                userRole.textContent = '身分: 求職者';
+            }
             authButton.textContent = '登出';
             authButton.href = '#';
             authButton.addEventListener('click', function() {
