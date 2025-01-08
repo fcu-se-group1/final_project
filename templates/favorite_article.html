@@ -11,11 +11,9 @@
                 <p id="courseCode" class="fw-bold mb-0 d-flex justify-content-center align-items-center text-dark px-1"></p>
             </div>
             <div class="card-body col-12 text-dark p-4 d-flex justify-content-center align-items-center" id="cardBody">
-                <div class="col-12 vh-40 p-0 d-flex flex-column justify-content-start align-items-center overflow-auto" id="overflowContainer">
+                <div class="col-12 vh-40 p-0 d-flex flex-column justify-content-start align-items-center overflow-auto gap-3" id="overflowContainer">
                     <p id="noFavoritesMessage" class="text-secondary my-3 d-none">您尚未收藏任何文章</p>
-                    <div class="col-12" id="favorite_articles"></div>
                 </div>
-                
             </div>
             <div class="card-footer px-4">
                 <div class="d-flex justify-content-end" style="gap: 2rem;">
@@ -89,7 +87,7 @@
     }
 
     function displayFavoriteArticles(data) {
-        const favoriteArticlesContainer = document.getElementById('favorite_articles');
+        const overflowContainer = document.getElementById('overflowContainer');
         const noFavoritesMessage = document.getElementById('noFavoritesMessage');
 
         if (data.message) {
@@ -98,17 +96,21 @@
         }
 
         data.forEach(article => {
+            const articleRow = document.createElement('div');
+            articleRow.className = 'col-8';
+
             const articleDiv = document.createElement('div');
-            articleDiv.className = 'd-flex justify-content-center align-item-center favorite-article mb-3';
+            articleDiv.className = 'd-flex justify-content-end align-item-center favorite-article mb-3';
 
-            const titleLink = document.createElement('a');
-            titleLink.href = '#';
+            const titleLink = document.createElement('div');
             titleLink.textContent = article.title;
-            titleLink.className = 'h4 me-5 fw-bold d-block mb-1 text-decoration-none text-purple';
-            titleLink.addEventListener('click', function() {
-                checkArticleExists(article.article_id);
-            });
+            titleLink.className = 'h4 mb-0 me-5 text-decoration-none text-purple text-center fw-bold';
 
+            const buttonContainer = document.createElement('div');
+            buttonContainer.className = 'd-flex';
+
+            
+            const deleteLinkDiv = document.createElement('div');
             const deleteLink = document.createElement('a');
             deleteLink.href = '#';
             deleteLink.textContent = '取消收藏';
@@ -116,10 +118,14 @@
             deleteLink.addEventListener('click', function() {
                 deleteFavoriteArticle(article.article_id);
             });
+            deleteLinkDiv.appendChild(deleteLink);
+
+            buttonContainer.appendChild(deleteLinkDiv);
 
             articleDiv.appendChild(titleLink);
-            articleDiv.appendChild(deleteLink);
-            favoriteArticlesContainer.appendChild(articleDiv);
+            articleDiv.appendChild(buttonContainer);
+            articleRow.appendChild(articleDiv);
+            overflowContainer.appendChild(articleRow);
         });
     }
 
