@@ -258,12 +258,35 @@
     }
 
     function navigateToAddComment() {
+        const userId = localStorage.getItem('user_id');
+
+        if (!userId) {
+            Swal.fire({
+                title: '錯誤',
+                text: '請先登入',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+            return;
+        }
         const articleId = new URLSearchParams(window.location.search).get('article_id');
         localStorage.setItem('article_id', articleId);
         window.location.href = '/add_comment';
     }
 
     function navigateToReplyComment(commentId, commentUsername) {
+        const userId = localStorage.getItem('user_id');        
+        if (!userId) {
+            Swal.fire({
+                title: '錯誤',
+                text: '請先登入',
+                icon: 'error',
+                confirmButtonText: '確定',
+                scrollbarPadding: false
+            });
+            return;
+        }
         const articleId = new URLSearchParams(window.location.search).get('article_id');
         localStorage.setItem('article_id', articleId);
         localStorage.setItem('comment_id', commentId);

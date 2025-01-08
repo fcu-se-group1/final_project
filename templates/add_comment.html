@@ -42,16 +42,6 @@
         const articleId = localStorage.getItem('article_id');
         const userId = localStorage.getItem('user_id');
         const content = document.getElementById('commentContent').value;
-        if (!userId) {
-            Swal.fire({
-                title: '請登入',
-                text: '您尚未登入',
-                icon: 'error',
-                confirmButtonText: '確定',
-                scrollbarPadding: false
-            });
-            return;
-        }
         if (!content) {
             Swal.fire({
                 title: '留言失敗',
