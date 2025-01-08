@@ -1,4 +1,4 @@
-# SEP-midterm-project
+# SEP-final-project
 # 軟體工程開發期末專題：展望笑嘻嘻的未來
 ## 分工：
 ### 資訊三甲 D1149474 洪采萱
