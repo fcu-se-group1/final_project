@@ -46,9 +46,16 @@
         const urlParams = new URLSearchParams(window.location.search);
         const articleId = urlParams.get('article_id');
         const userId = localStorage.getItem('user_id');
-        if (articleId && userId) {
-            fetchArticleDetails(articleId);
+        if (!userId) {
+            favoriteButton.textContent = '尚未登入';
+            favoriteButton.classList.add('disabled');
+            favoriteButton.onclick = null;
+        }
+        else{
             checkFavoriteStatus(userId, articleId);
+        }
+        if (articleId ) {
+            fetchArticleDetails(articleId);
         } else {
             Swal.fire({
                 title: '錯誤',
